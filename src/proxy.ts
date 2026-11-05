@@ -19,7 +19,7 @@ export async function proxy(request: NextRequest) {
   });
 
   const { data: { user } } = await supabase.auth.getUser();
-  const protectedPath = ["/profile", "/settings", "/favorites", "/orders", "/checkout"].some(
+  const protectedPath = ["/profile", "/settings", "/orders", "/checkout"].some(
     (path) => request.nextUrl.pathname === path || request.nextUrl.pathname.startsWith(path + "/")
   );
 
