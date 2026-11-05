@@ -30,7 +30,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(destination);
   }
 
-  if (user && ["/login", "/signup", "/forgot-password"].includes(request.nextUrl.pathname)) {
+  if (user && ["/login", "/signup"].includes(request.nextUrl.pathname)) {
     return NextResponse.redirect(new URL("/profile", request.url));
   }
 
