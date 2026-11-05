@@ -41,14 +41,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     if (ready) localStorage.setItem(STORAGE_KEY,JSON.stringify(items));
   },[items,ready]);
   const addItem = useCallback((item: Omit<CartItem,"quantity">) => {
-    let accepted = true;
-    setItems(current => {
-      if (current.length && current[0].vendorSlug !== item.vendorSlug) { accepted = false; return current; }
-      const found = current.find(row=>row.id===item.id);
-      return found ? current.map(row=>row.id===item.id?{...row,quantity:row.quantity+1}:row) : [...current,{...item,quantity:1}];
-    });
-    return accepted;
-  },[]);
+    if (items.length && items[0].vendorSlug !== item.vendorSlug) return false;
+    const found = items.find(row=>row.id===item.id);
+    setItems(found
+      ? items.map(row=>row.id===item.id?{...row,quantity:row.quantity+1}:row)
+      : [...items,{...item,quantity:1}]);
+    return true;
+  },[items]);
   const setQuantity = useCallback((id:string,quantity:number) => setItems(current=>quantity<=0?current.filter(x=>x.id!==id):current.map(x=>x.id===id?{...x,quantity}:x)),[]);
   const removeItem = useCallback((id:string)=>setItems(current=>current.filter(x=>x.id!==id)),[]);
   const clearCart = useCallback(()=>setItems([]),[]);
