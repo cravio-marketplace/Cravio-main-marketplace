@@ -126,3 +126,7 @@ button { cursor: pointer; }
   .mobile-nav { position: fixed; z-index: 40; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); border-top: 1px solid #eee8e3; background: #ffffffed; backdrop-filter: blur(18px); }.mobile-nav a { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 55px; color: #8c837c; font-size: 9px; font-weight: 650; }.mobile-nav .mobile-nav-active { color: var(--cravio-orange); }
 }
 @media (prefers-reduced-motion: reduce) { *,*::before,*::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; } }
+
+.header-signup { display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; padding: 10px 14px; background: var(--cravio-orange); color: #fff; font-size: 13px; font-weight: 700; transition: background .2s; }
+.header-signup:hover { background: #e85f00; }
+@media (max-width: 700px) { .header-signup { padding: 9px 11px; font-size: 12px; } }
