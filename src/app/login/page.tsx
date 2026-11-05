@@ -1,19 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Eye, EyeOff, ArrowRight, Utensils } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
   const router = useRouter();
-  const params = useSearchParams();
   const [email,setEmail]=useState("");
   const [password,setPassword]=useState("");
   const [show,setShow]=useState(false);
   const [busy,setBusy]=useState(false);
-  const [error,setError]=useState(params.get("error")==="auth_callback"?"Your sign-in link could not be verified. Please try again.":"");
+  const [error,setError]=useState("");
+  useEffect(() => { if (new URLSearchParams(window.location.search).get("error") === "auth_callback") setError("Your sign-in link could not be verified. Please try again."); }, []);
 
   async function submit(e:React.FormEvent<HTMLFormElement>) {
     e.preventDefault(); setBusy(true); setError("");
@@ -21,7 +21,8 @@ export default function LoginPage() {
       const supabase=createClient();
       const {error}=await supabase.auth.signInWithPassword({email:email.trim(),password});
       if(error) throw error;
-      router.replace(params.get("redirectTo") || "/profile"); router.refresh();
+      const redirectTo = new URLSearchParams(window.location.search).get("redirectTo");
+      router.replace(redirectTo?.startsWith("/") ? redirectTo : "/profile"); router.refresh();
     } catch(err) { setError(err instanceof Error?err.message:"Unable to sign in. Please try again."); }
     finally { setBusy(false); }
   }
