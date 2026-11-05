@@ -60,7 +60,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
         if (authError) setError(authError.message);
         const uid = data.user?.id ?? null;
         setUserId(uid);
-        if (uid) void loadFavorites(uid);
+        if (uid) void loadFavorites(uid).finally(() => { if (alive) setLoading(false); });
         else setLoading(false);
       }).catch((err: unknown) => {
         if (alive) {
