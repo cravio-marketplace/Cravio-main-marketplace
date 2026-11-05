@@ -16,7 +16,7 @@ export default function SignupPage() {
       const supabase=createClient();
       const {data,error}=await supabase.auth.signUp({
         email:email.trim(),password,
-        options:{emailRedirectTo:`${window.location.origin}/auth/callback?next=/profile`,data:{full_name:name.trim(),phone:phone.trim(),role:"student"}}
+        options:{emailRedirectTo:`${window.location.origin}/auth/callback?next=/profile`,data:{full_name:name.trim(),phone:phone.trim()}}
       });
       if(error) throw error;
       if(data.session){router.replace("/profile");router.refresh();}
