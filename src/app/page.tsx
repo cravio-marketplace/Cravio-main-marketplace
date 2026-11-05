@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { FavoriteButton } from "@/components/favorite-button";
 import {
   ArrowRight, Search, ShoppingBag, Clock3, Star, Heart, Plus,
   Utensils, Coffee, Sandwich, CakeSlice, CupSoda, Salad, MapPin,
@@ -17,9 +18,9 @@ const categories = [
 ];
 
 const vendors = [
-  { name: "Mama’s Kitchen", type: "Local favourites", rating: "4.8", time: "15–25 min", image: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=900&q=85", tag: "Student favourite" },
-  { name: "The Grill Spot", type: "Grills & wraps", rating: "4.7", time: "10–20 min", image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=900&q=85", tag: "Quick bites" },
-  { name: "Chop & Sip", type: "Meals and drinks", rating: "4.9", time: "20–30 min", image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=85", tag: "Popular" },
+  { slug: "mamas-kitchen", name: "Mama’s Kitchen", type: "Local favourites", rating: "4.8", time: "15–25 min", image: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=900&q=85", tag: "Student favourite" },
+  { slug: "the-grill-spot", name: "The Grill Spot", type: "Grills & wraps", rating: "4.7", time: "10–20 min", image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=900&q=85", tag: "Quick bites" },
+  { slug: "chop-and-sip", name: "Chop & Sip", type: "Meals and drinks", rating: "4.9", time: "20–30 min", image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=85", tag: "Popular" },
 ];
 
 const meals = [
@@ -86,13 +87,13 @@ export default function Home() {
 
       <section className="content-section vendors-section">
         <div className="section-heading"><div><span className="section-kicker">THE CAMPUS HOTSPOTS</span><h2>Popular on campus</h2><p className="section-description">The spots students keep coming back to.</p></div><Link href="/explore" className="text-link">All vendors <ArrowRight size={16}/></Link></div>
-        <div className="vendor-grid">{vendors.map((vendor)=><Link href="/vendors/mama-kitchen" className="vendor-card" key={vendor.name}><div className="vendor-photo" style={{backgroundImage:`url("${vendor.image}")`}}><span className="vendor-tag">{vendor.tag}</span><button className="save-button" aria-label={`Save ${vendor.name}`} onClick={(e)=>e.preventDefault()}><Heart size={17}/></button></div><div className="vendor-info"><div><h3>{vendor.name}</h3><p>{vendor.type}</p></div><span className="vendor-rating"><Star size={14} fill="currentColor"/> {vendor.rating}</span></div><div className="vendor-meta"><span><Clock3 size={14}/>{vendor.time}</span><span>Pickup available</span></div></Link>)}</div>
+        <div className="vendor-grid">{vendors.map((vendor)=><Link href="/vendors/mama-kitchen" className="vendor-card" key={vendor.name}><div className="vendor-photo" style={{backgroundImage:`url("${vendor.image}")`}}><span className="vendor-tag">{vendor.tag}</span><FavoriteButton itemKey={`vendor:${vendor.slug}`} itemType="vendor" name={vendor.name} vendorSlug={vendor.slug} imageUrl={vendor.image} /></div><div className="vendor-info"><div><h3>{vendor.name}</h3><p>{vendor.type}</p></div><span className="vendor-rating"><Star size={14} fill="currentColor"/> {vendor.rating}</span></div><div className="vendor-meta"><span><Clock3 size={14}/>{vendor.time}</span><span>Pickup available</span></div></Link>)}</div>
       </section>
 
       <section className="content-section meals-section" id="meals">
         <div className="section-heading"><div><span className="section-kicker">A LITTLE SOMETHING DELICIOUS</span><h2>Cravings worth ordering</h2><p className="section-description">Good food. Great mood. No long queues.</p></div><Link href="/explore" className="text-link">View menu <ArrowRight size={16}/></Link></div>
         <div className="filter-row"><button className={activeCategory==="All"?"filter-active":"filter"} onClick={()=>setActiveCategory("All")}>All meals</button>{categories.slice(0,4).map(c=><button key={c.name} className={activeCategory===c.name?"filter-active":"filter"} onClick={()=>setActiveCategory(c.name)}>{c.name}</button>)}</div>
-        <div className="meal-grid">{filteredMeals.map(meal=><article className="meal-card" key={meal.name}><div className="meal-photo" style={{backgroundImage:`url("${meal.image}")`}}><span className="meal-badge">{meal.badge}</span><button className="save-button" aria-label={`Save ${meal.name}`}><Heart size={17}/></button></div><div className="meal-info"><p className="meal-vendor">{meal.vendor}</p><h3>{meal.name}</h3><div className="meal-bottom"><strong>{money(meal.price)}</strong><button className="add-button" aria-label={`Add ${meal.name} to cart`} onClick={()=>window.alert("Cart functionality is coming next.")}><Plus size={18}/></button></div></div></article>)}</div>
+        <div className="meal-grid">{filteredMeals.map(meal=><article className="meal-card" key={meal.name}><div className="meal-photo" style={{backgroundImage:`url("${meal.image}")`}}><span className="meal-badge">{meal.badge}</span><FavoriteButton itemKey={`meal:${meal.name.toLowerCase().replace(/[^a-z0-9]+/g,"-")}`} itemType="meal" name={meal.name} vendorName={meal.vendor} vendorSlug={meal.vendor === "Mama’s Kitchen" ? "mamas-kitchen" : meal.vendor === "The Grill Spot" ? "the-grill-spot" : "chop-and-sip"} price={meal.price} imageUrl={meal.image} /></div><div className="meal-info"><p className="meal-vendor">{meal.vendor}</p><h3>{meal.name}</h3><div className="meal-bottom"><strong>{money(meal.price)}</strong><button className="add-button" aria-label={`Add ${meal.name} to cart`} onClick={()=>window.alert("Cart functionality is coming next.")}><Plus size={18}/></button></div></div></article>)}</div>
         {filteredMeals.length===0&&<div className="empty-results">No meals found. Try another search or category.</div>}
       </section>
 
