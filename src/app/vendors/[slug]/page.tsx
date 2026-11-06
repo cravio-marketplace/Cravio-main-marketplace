@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { useCart } from "@/components/cart-provider";
 import { FavoriteButton } from "@/components/favorite-button";
+import { useCampusCatalog } from "@/lib/catalog";
 import { ArrowLeft, ArrowRight, Clock3, MapPin, Plus, Search, Star, Store } from "lucide-react";
 
 const catalog=[
@@ -29,11 +30,11 @@ const catalog=[
 const money=(n:number)=>new Intl.NumberFormat("en-NG",{style:"currency",currency:"NGN",maximumFractionDigits:0}).format(n);
 
 export default function VendorStorefront(){
- const params=useParams<{slug:string}>(); const vendor=catalog.find(v=>v.slug===params.slug);
+ const params=useParams<{slug:string}>(); const {vendors:liveVendors,menu:liveMenu,loading:catalogLoading}=useCampusCatalog(); const mockVendor=catalog.find(v=>v.slug===params.slug); const liveVendor=liveVendors.find(v=>v.slug===params.slug); const vendor=liveVendor?{slug:liveVendor.slug,name:liveVendor.name,type:liveVendor.description||"Campus vendor",rating:"New",time:"Pickup",cover:liveVendor.cover_url||liveVendor.logo_url||"",description:liveVendor.description||"Campus vendor",menu:liveMenu.filter(m=>m.vendor_id===liveVendor.id).map(m=>({name:m.name,description:m.category||"Freshly prepared",price:m.price,category:m.category||"Meals",image:m.image_url||liveVendor.cover_url||liveVendor.logo_url||"",id:m.id}))}:mockVendor;
  const [term,setTerm]=useState(""); const [category,setCategory]=useState("All"); const {addItem,itemCount}=useCart(); const [notice,setNotice]=useState("");
  const categories=useMemo(()=>["All",...Array.from(new Set(vendor?.menu.map(m=>m.category)??[]))],[vendor]);
  const items=useMemo(()=>vendor?.menu.filter(m=>(category==="All"||m.category===category)&&m.name.toLowerCase().includes(term.toLowerCase()))??[],[vendor,category,term]);
- if(!vendor)return <main className="min-h-screen bg-[#fffdfb] px-6 py-24 text-center"><Store className="mx-auto text-[#ff6b00]" size={30}/><h1 className="mt-4 text-2xl font-bold">Vendor not found</h1><p className="mt-2 text-sm text-[#8b8179]">This storefront may have moved or is not available.</p><Link href="/explore" className="mt-5 inline-block font-bold text-[#ff6b00]">Back to Explore</Link></main>;
+ if(!vendor&&catalogLoading)return <main className="min-h-screen grid place-items-center text-sm text-[#8b8179]">Loading vendor storefront…</main>; if(!vendor)return <main className="min-h-screen bg-[#fffdfb] px-6 py-24 text-center"><Store className="mx-auto text-[#ff6b00]" size={30}/><h1 className="mt-4 text-2xl font-bold">Vendor not found</h1><p className="mt-2 text-sm text-[#8b8179]">This storefront may have moved or is not available.</p><Link href="/explore" className="mt-5 inline-block font-bold text-[#ff6b00]">Back to Explore</Link></main>;
  return <main className="min-h-screen bg-[#fffdfb] text-[#1f1f1f]">
   <header className="sticky top-0 z-20 border-b border-[#eee9e5] bg-white/95 backdrop-blur"><div className="mx-auto flex h-[66px] max-w-[1180px] items-center justify-between px-5 md:px-8"><Link href="/" className="font-[family-name:var(--font-space-grotesk)] text-[27px] font-bold tracking-[-1.7px]">cravio<span className="text-[#ff6b00]">.</span></Link><Link href="/cart" className="rounded-xl border border-[#eee7e1] px-4 py-2 text-sm font-bold">Cart ({itemCount})</Link></div></header>
   <div className="mx-auto max-w-[1080px] px-5 pb-20 pt-7 md:px-8"><Link href="/explore" className="inline-flex items-center gap-2 text-xs font-bold text-[#8b8179]"><ArrowLeft size={14}/> Explore vendors</Link>
