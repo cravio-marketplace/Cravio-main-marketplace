@@ -24,6 +24,9 @@ const mockMeals=[
 const naira=(n:number)=>new Intl.NumberFormat("en-NG",{style:"currency",currency:"NGN",maximumFractionDigits:0}).format(n);
 
 export default function ExplorePage(){
+ const {vendors:liveVendors,menu:liveMenu,loading:catalogLoading,error:catalogError}=useCampusCatalog();
+ const vendors=liveVendors.length?liveVendors.map(v=>({slug:v.slug,name:v.name,type:v.description||"Campus vendor",rating:0,time:"Pickup",status:"Open",category:"All",image:v.cover_url||v.logo_url||"",featured:false})):mockVendors;
+ const meals=liveVendors.length?liveMenu.filter(m=>liveVendors.some(v=>v.id===m.vendor_id)).map(m=>{const v=liveVendors.find(v=>v.id===m.vendor_id)!;return {name:m.name,vendor:v.name,slug:v.slug,price:m.price,category:m.category||"Meals",image:m.image_url||v.cover_url||v.logo_url||""}}):mockMeals;
  const [term,setTerm]=useState(""); const [category,setCategory]=useState("All"); const [tab,setTab]=useState<"all"|"vendors"|"meals">("all"); const [sort,setSort]=useState("recommended");
  const visibleVendors=useMemo(()=>vendors.filter(v=>(category==="All"||v.category===category)&&(`${v.name} ${v.type}`.toLowerCase().includes(term.toLowerCase()))).sort((a,b)=>sort==="rating"?b.rating-a.rating:0),[term,category,sort]);
  const visibleMeals=useMemo(()=>meals.filter(m=>(category==="All"||m.category===category)&&(`${m.name} ${m.vendor}`.toLowerCase().includes(term.toLowerCase()))),[term,category]);
