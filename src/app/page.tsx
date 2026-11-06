@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { FavoriteButton } from "@/components/favorite-button";
+import { useCampusCatalog } from "@/lib/catalog";
 import {
   ArrowRight, Search, ShoppingBag, Clock3, Star, Heart, Plus,
   Utensils, Coffee, Sandwich, CakeSlice, CupSoda, Salad, MapPin,
@@ -17,13 +18,13 @@ const categories = [
   { name: "Desserts", icon: CakeSlice },
 ];
 
-const vendors = [
+const mockVendors = [
   { slug: "mamas-kitchen", name: "Mama’s Kitchen", type: "Local favourites", rating: "4.8", time: "15–25 min", image: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=900&q=85", tag: "Student favourite" },
   { slug: "the-grill-spot", name: "The Grill Spot", type: "Grills & wraps", rating: "4.7", time: "10–20 min", image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=900&q=85", tag: "Quick bites" },
   { slug: "chop-and-sip", name: "Chop & Sip", type: "Meals and drinks", rating: "4.9", time: "20–30 min", image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=85", tag: "Popular" },
 ];
 
-const meals = [
+const mockMeals = [
   { name: "Smoky party jollof", vendor: "Mama’s Kitchen", price: 2500, category: "Rice & meals", image: "https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?auto=format&fit=crop&w=800&q=85", badge: "Bestseller" },
   { name: "Crispy chicken & chips", vendor: "The Grill Spot", price: 3800, category: "Fast food", image: "https://images.unsplash.com/photo-1606755962773-d324e0a13086?auto=format&fit=crop&w=800&q=85", badge: "Popular" },
   { name: "Creamy chicken pasta", vendor: "Chop & Sip", price: 3200, category: "Rice & meals", image: "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=800&q=85", badge: "New" },
@@ -33,6 +34,9 @@ const meals = [
 const money = (amount: number) => new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }).format(amount);
 
 export default function Home() {
+  const { vendors: liveVendors, menu: liveMenu } = useCampusCatalog();
+  const vendors = liveVendors.length ? liveVendors.slice(0,3).map(v=>({slug:v.slug,name:v.name,type:v.description||"Campus vendor",rating:"New",time:"Pickup",image:v.cover_url||v.logo_url||"",tag:"Verified campus vendor"})) : mockVendors;
+  const meals = liveVendors.length ? liveMenu.slice(0,4).map(m=>{const v=liveVendors.find(v=>v.id===m.vendor_id)!;return {name:m.name,vendor:v.name,price:m.price,category:m.category||"Meals",image:m.image_url||v.cover_url||v.logo_url||"",badge:"Available",vendorSlug:v.slug}}) : mockMeals.map(m=>({...m,vendorSlug:m.vendor==="Mama’s Kitchen"?"mamas-kitchen":m.vendor==="The Grill Spot"?"the-grill-spot":"chop-and-sip"}));
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const filteredMeals = useMemo(() => meals.filter((meal) =>
@@ -93,7 +97,7 @@ export default function Home() {
       <section className="content-section meals-section" id="meals">
         <div className="section-heading"><div><span className="section-kicker">A LITTLE SOMETHING DELICIOUS</span><h2>Cravings worth ordering</h2><p className="section-description">Good food. Great mood. No long queues.</p></div><Link href="/explore" className="text-link">View menu <ArrowRight size={16}/></Link></div>
         <div className="filter-row"><button className={activeCategory==="All"?"filter-active":"filter"} onClick={()=>setActiveCategory("All")}>All meals</button>{categories.slice(0,4).map(c=><button key={c.name} className={activeCategory===c.name?"filter-active":"filter"} onClick={()=>setActiveCategory(c.name)}>{c.name}</button>)}</div>
-        <div className="meal-grid">{filteredMeals.map(meal=><article className="meal-card" key={meal.name}><div className="meal-photo" style={{backgroundImage:`url("${meal.image}")`}}><span className="meal-badge">{meal.badge}</span><FavoriteButton itemKey={`meal:${meal.name.toLowerCase().replace(/[^a-z0-9]+/g,"-")}`} itemType="meal" name={meal.name} vendorName={meal.vendor} vendorSlug={meal.vendor === "Mama’s Kitchen" ? "mamas-kitchen" : meal.vendor === "The Grill Spot" ? "the-grill-spot" : "chop-and-sip"} price={meal.price} imageUrl={meal.image} /></div><div className="meal-info"><p className="meal-vendor">{meal.vendor}</p><h3>{meal.name}</h3><div className="meal-bottom"><strong>{money(meal.price)}</strong><button className="add-button" aria-label={`Add ${meal.name} to cart`} onClick={()=>window.alert("Cart functionality is coming next.")}><Plus size={18}/></button></div></div></article>)}</div>
+        <div className="meal-grid">{filteredMeals.map(meal=><article className="meal-card" key={meal.name}><div className="meal-photo" style={{backgroundImage:`url("${meal.image}")`}}><span className="meal-badge">{meal.badge}</span><FavoriteButton itemKey={`meal:${meal.name.toLowerCase().replace(/[^a-z0-9]+/g,"-")}`} itemType="meal" name={meal.name} vendorName={meal.vendor} vendorSlug={meal.vendorSlug} price={meal.price} imageUrl={meal.image} /></div><div className="meal-info"><p className="meal-vendor">{meal.vendor}</p><h3>{meal.name}</h3><div className="meal-bottom"><strong>{money(meal.price)}</strong><button className="add-button" aria-label={`Add ${meal.name} to cart`} onClick={()=>window.alert("Cart functionality is coming next.")}><Plus size={18}/></button></div></div></article>)}</div>
         {filteredMeals.length===0&&<div className="empty-results">No meals found. Try another search or category.</div>}
       </section>
 
