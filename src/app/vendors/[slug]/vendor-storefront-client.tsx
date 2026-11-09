@@ -8,29 +8,10 @@ import { FavoriteButton } from "@/components/favorite-button";
 import { useCampusCatalog } from "@/lib/catalog";
 import { ArrowLeft, ArrowRight, Clock3, MapPin, Plus, Search, Star, Store } from "lucide-react";
 
-const catalog=[
- {slug:"mamas-kitchen",name:"Mama’s Kitchen",type:"Authentic Nigerian meals",rating:"4.8",time:"15–25 min",cover:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=1500&q=90",description:"Comforting campus meals, freshly prepared and full of flavour.",menu:[
-  {name:"Smoky party jollof",description:"Party-style jollof rice served with tender chicken.",price:2500,category:"Rice & meals",image:"https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?auto=format&fit=crop&w=800&q=85"},
-  {name:"Fried rice & chicken",description:"Colourful vegetable fried rice with seasoned chicken.",price:3000,category:"Rice & meals",image:"https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=800&q=85"},
-  {name:"Spaghetti stir-fry",description:"A savoury stir-fry with vegetables and a rich sauce.",price:2200,category:"Rice & meals",image:"https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=800&q=85"},
-  {name:"Chilled zobo",description:"Refreshing house-made hibiscus drink.",price:700,category:"Drinks",image:"https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=800&q=85"}
- ]},
- {slug:"the-grill-spot",name:"The Grill Spot",type:"Grills, wraps & sides",rating:"4.7",time:"10–20 min",cover:"https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=1500&q=90",description:"Grilled favourites and quick bites made fresh for your break.",menu:[
-  {name:"Loaded shawarma",description:"Warm flatbread packed with chicken, vegetables and sauce.",price:3000,category:"Fast food",image:"https://images.unsplash.com/photo-1529006557810-274b9b2fc783?auto=format&fit=crop&w=800&q=85"},
-  {name:"Crispy chicken & chips",description:"Golden fries with crunchy, seasoned chicken.",price:3800,category:"Fast food",image:"https://images.unsplash.com/photo-1606755962773-d324e0a13086?auto=format&fit=crop&w=800&q=85"}
- ]},
- {slug:"chop-and-sip",name:"Chop & Sip",type:"Meals, snacks & drinks",rating:"4.9",time:"20–30 min",cover:"https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1500&q=90",description:"A little something for every craving, from lunch to late afternoon.",menu:[
-  {name:"Creamy chicken pasta",description:"Creamy pasta tossed with chicken and herbs.",price:3200,category:"Meals",image:"https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=800&q=85"},
-  {name:"Fresh fruit smoothie",description:"A cool blend of seasonal fruits.",price:1800,category:"Drinks",image:"https://images.unsplash.com/photo-1505252585461-04db1eb84625?auto=format&fit=crop&w=800&q=85"}
- ]},
- {slug:"daily-bites",name:"Daily Bites",type:"Quick meals & snacks",rating:"4.6",time:"10–15 min",cover:"https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=1500&q=90",description:"Quick, satisfying bites for the in-between moments.",menu:[
-  {name:"Loaded cheesy fries",description:"Crispy fries topped with cheese and house sauce.",price:2200,category:"Snacks",image:"https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=800&q=85"}
- ]}
-];
 const money=(n:number)=>new Intl.NumberFormat("en-NG",{style:"currency",currency:"NGN",maximumFractionDigits:0}).format(n);
 
 export default function VendorStorefront(){
- const params=useParams<{slug:string}>(); const {vendors:liveVendors,menu:liveMenu,loading:catalogLoading}=useCampusCatalog(); const mockVendor=catalog.find(v=>v.slug===params.slug); const liveVendor=liveVendors.find(v=>v.slug===params.slug); const vendor=liveVendor?{slug:liveVendor.slug,name:liveVendor.name,type:liveVendor.description||"Campus vendor",rating:"New",time:"Pickup",cover:liveVendor.cover_url||liveVendor.logo_url||"",description:liveVendor.description||"Campus vendor",menu:liveMenu.filter(m=>m.vendor_id===liveVendor.id).map(m=>({name:m.name,description:m.category||"Freshly prepared",price:m.price,category:m.category||"Meals",image:m.image_url||liveVendor.cover_url||liveVendor.logo_url||"",id:String(m.id),menuItemId:String(m.id),vendorId:liveVendor.id}))}:mockVendor;
+ const params=useParams<{slug:string}>(); const {vendors:liveVendors,menu:liveMenu,loading:catalogLoading}=useCampusCatalog(); const liveVendor=liveVendors.find(v=>v.slug===params.slug); const vendor=liveVendor?{slug:liveVendor.slug,name:liveVendor.name,type:liveVendor.description||"Campus vendor",rating:"New",time:"Pickup",cover:liveVendor.cover_url||liveVendor.logo_url||"",description:liveVendor.description||"Campus vendor",menu:liveMenu.filter(m=>m.vendor_id===liveVendor.id).map(m=>({name:m.name,description:m.category||"Freshly prepared",price:m.price,category:m.category||"Meals",image:m.image_url||liveVendor.cover_url||liveVendor.logo_url||"",id:String(m.id),menuItemId:String(m.id),vendorId:liveVendor.id}))}:null;
  const [term,setTerm]=useState(""); const [category,setCategory]=useState("All"); const {addItem,itemCount}=useCart(); const [notice,setNotice]=useState("");
  const categories=useMemo(()=>["All",...Array.from(new Set(vendor?.menu.map(m=>m.category)??[]))],[vendor]);
  const items=useMemo(()=>vendor?.menu.filter(m=>(category==="All"||m.category===category)&&m.name.toLowerCase().includes(term.toLowerCase()))??[],[vendor,category,term]);
