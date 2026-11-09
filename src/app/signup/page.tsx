@@ -16,10 +16,10 @@ export default function SignupPage() {
       const supabase=createClient();
       const {data,error}=await supabase.auth.signUp({
         email:email.trim(),password,
-        options:{emailRedirectTo:`${window.location.origin}/auth/callback?next=/profile`,data:{full_name:name.trim(),phone:phone.trim()}}
+        options:{emailRedirectTo:`${window.location.origin}/auth/callback?next=/`,data:{full_name:name.trim(),phone:phone.trim()}}
       });
       if(error) throw error;
-      if(data.session){router.replace("/profile");router.refresh();}
+      if(data.session){router.replace("/");router.refresh();}
       else setSent(true);
     } catch(err){setError(err instanceof Error?err.message:"Unable to create your account.");}
     finally{setBusy(false);}
