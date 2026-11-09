@@ -7,7 +7,7 @@ import { FavoriteButton } from "@/components/favorite-button";
 import { useCampusCatalog } from "@/lib/catalog";
 
 const categories=["All","Rice & meals","Fast food","Snacks","Drinks","Breakfast","Desserts"];
-const naira=(n:number)=>new Intl.NumberFormat("en-NG",{style:"currency",currency:"NGN",maximumFractionDigits:0}).format(n);
+const naira=(n:number)=>new Intl.NumberFormat("en-NG",{style:"currency",currency:"NGN",maximumFractionDigits:0}).format(n/100);
 
 export default function ExplorePage(){
  const {vendors:liveVendors,menu:liveMenu,loading:catalogLoading,error:catalogError}=useCampusCatalog();
