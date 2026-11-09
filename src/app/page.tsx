@@ -72,7 +72,14 @@ export default function Home() {
             <Link className="nav-active" href="/">Home</Link><Link href="/explore">Explore</Link><Link href="/favorites">Favorites</Link><Link href="/orders">My orders</Link>
           </nav>
           <div className="header-actions">
-            <Link href="/login" className="sign-in">Sign in</Link><Link href="/signup" className="header-signup">Create account</Link>
+            {authReady && currentUser ? (
+              <Link href="/profile" className="sign-in" aria-label={currentUser.email ? `My account, signed in as ${currentUser.email}` : "My account"}>My account</Link>
+            ) : (
+              <>
+                <Link href="/login" className="sign-in">Sign in</Link>
+                <Link href="/signup" className="header-signup">Create account</Link>
+              </>
+            )}
             <Link href="/cart" className="cart-button" aria-label="Open cart"><ShoppingBag size={19}/><span>Cart</span><b>0</b></Link>
           </div>
         </div>
