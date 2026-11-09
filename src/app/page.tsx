@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 import { FavoriteButton } from "@/components/favorite-button";
 import { useCampusCatalog } from "@/lib/catalog";
 import {
@@ -37,6 +38,24 @@ export default function Home() {
   const { vendors: liveVendors, menu: liveMenu } = useCampusCatalog();
   const vendors = liveVendors.length ? liveVendors.slice(0,3).map(v=>({slug:v.slug,name:v.name,type:v.description||"Campus vendor",rating:"New",time:"Pickup",image:v.cover_url||v.logo_url||"",tag:"Verified campus vendor"})) : mockVendors;
   const meals = liveVendors.length ? liveMenu.slice(0,4).map(m=>{const v=liveVendors.find(v=>v.id===m.vendor_id)!;return {name:m.name,vendor:v.name,price:m.price,category:m.category||"Meals",image:m.image_url||v.cover_url||v.logo_url||"",badge:"Available",vendorSlug:v.slug}}) : mockMeals.map(m=>({...m,vendorSlug:m.vendor==="Mama’s Kitchen"?"mamas-kitchen":m.vendor==="The Grill Spot"?"the-grill-spot":"chop-and-sip"}));
+  const [currentUser, setCurrentUser] = useState<{ email?: string } | null>(null);
+  const [authReady, setAuthReady] = useState(false);
+
+  useEffect(() => {
+    const supabase = createClient();
+    let active = true;
+    supabase.auth.getUser().then(({ data }) => {
+      if (active) {
+        setCurrentUser(data.user ? { email: data.user.email ?? undefined } : null);
+        setAuthReady(true);
+      }
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (active) setCurrentUser(session?.user ? { email: session.user.email ?? undefined } : null);
+    });
+    return () => { active = false; subscription.unsubscribe(); };
+  }, []);
+
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const filteredMeals = useMemo(() => meals.filter((meal) =>
@@ -103,7 +122,7 @@ export default function Home() {
 
       <section className="content-section promo-section"><div className="promo-card"><div><span className="promo-kicker">YOUR NEXT FAVOURITE IS WAITING</span><h2>Good food is closer<br/>than you think.</h2><p>Explore campus vendors and make your next break count.</p><Link href="/explore" className="promo-button">Find your next meal <ArrowRight size={17}/></Link></div><div className="promo-art"><div className="promo-circle"/><span className="promo-star">✳</span><span className="promo-word">YUM.</span></div></div></section>
 
-      <footer className="site-footer"><div className="footer-top"><Link href="/" className="brand">cravio<span>.</span></Link><p>Campus food, without the fuss.</p><div className="footer-links"><Link href="/login">Sign in</Link><Link href="/signup">Create account</Link><Link href="/profile">My account</Link><Link href="/explore">Explore</Link><Link href="/help">Help</Link><Link href="/privacy">Privacy</Link><Link href="/terms">Terms</Link></div></div><div className="footer-bottom"><span>© {2026} Cravio. Made for campus.</span><span>Good food. Better breaks.</span></div></footer>
+      <footer className="site-footer"><div className="footer-top"><Link href="/" className="brand">cravio<span>.</span></Link><p>Campus food, without the fuss.</p><div className="footer-links">{authReady && currentUser ? <Link href="/profile">My account</Link> : <><Link href="/login">Sign in</Link><Link href="/signup">Create account</Link></>}<Link href="/explore">Explore</Link><Link href="/help">Help</Link><Link href="/privacy">Privacy</Link><Link href="/terms">Terms</Link></div></div><div className="footer-bottom"><span>© {2026} Cravio. Made for campus.</span><span>Good food. Better breaks.</span></div></footer>
       <nav className="mobile-nav"><Link href="/" className="mobile-nav-active"><Utensils size={19}/><span>Home</span></Link><Link href="/explore"><Search size={19}/><span>Explore</span></Link><Link href="/favorites"><Heart size={19}/><span>Saved</span></Link><Link href="/cart"><ShoppingBag size={19}/><span>Cart</span></Link></nav>
     </main>
   );
