@@ -19,19 +19,6 @@ const categories = [
   { name: "Desserts", icon: CakeSlice },
 ];
 
-const mockVendors = [
-  { slug: "mamas-kitchen", name: "Mama’s Kitchen", type: "Local favourites", rating: "4.8", time: "15–25 min", image: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=900&q=85", tag: "Student favourite" },
-  { slug: "the-grill-spot", name: "The Grill Spot", type: "Grills & wraps", rating: "4.7", time: "10–20 min", image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=900&q=85", tag: "Quick bites" },
-  { slug: "chop-and-sip", name: "Chop & Sip", type: "Meals and drinks", rating: "4.9", time: "20–30 min", image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=85", tag: "Popular" },
-];
-
-const mockMeals = [
-  { name: "Smoky party jollof", vendor: "Mama’s Kitchen", price: 2500, category: "Rice & meals", image: "https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?auto=format&fit=crop&w=800&q=85", badge: "Bestseller" },
-  { name: "Crispy chicken & chips", vendor: "The Grill Spot", price: 3800, category: "Fast food", image: "https://images.unsplash.com/photo-1606755962773-d324e0a13086?auto=format&fit=crop&w=800&q=85", badge: "Popular" },
-  { name: "Creamy chicken pasta", vendor: "Chop & Sip", price: 3200, category: "Rice & meals", image: "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=800&q=85", badge: "New" },
-  { name: "Loaded shawarma", vendor: "The Grill Spot", price: 3000, category: "Fast food", image: "https://images.unsplash.com/photo-1529006557810-274b9b2fc783?auto=format&fit=crop&w=800&q=85", badge: "Student pick" },
-];
-
 const money = (amount: number) => new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }).format(amount);
 
 export default function Home() {
