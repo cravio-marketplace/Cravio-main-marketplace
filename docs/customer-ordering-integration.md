@@ -26,13 +26,16 @@ Use the backend's public HTTPS origin only. Do not put Supabase service-role cre
 
 ### Vendor Express backend
 
-Set these backend environment variables in the backend hosting provider:
+For local development, create `backend/.env` from `backend/.env.example` and set:
 
 ```env
+PORT=5000
 SUPABASE_URL=https://YOUR_PROJECT.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=YOUR_SERVICE_ROLE_KEY
-FRONTEND_URL=https://YOUR_CUSTOMER_APP_DOMAIN
+FRONTEND_URL=http://localhost:3000
 ```
+
+Start the backend from its `backend` directory with `npm install` followed by `npm run dev`. Keep the service-role key only in this backend `.env`; never put it in the customer app. For production, set `FRONTEND_URL` to the real customer site origin and deploy the backend.
 
 The service-role key must remain server-side. If the customer app has both production and preview domains, include the exact allowed origins as a comma-separated `FRONTEND_URL` value.
 
