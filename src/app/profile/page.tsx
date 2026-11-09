@@ -4,6 +4,9 @@ import { ArrowRight, Heart, MapPin, Package, Settings, UserRound } from "lucide-
 import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "@/components/auth/logout-button";
 
+// This page is personalized and reads the authenticated session from cookies.
+export const instant = false;
+
 export default async function ProfilePage(){
  const supabase=await createClient();
  const {data:{user},error}=await supabase.auth.getUser();
