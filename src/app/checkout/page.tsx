@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { ArrowLeft, CheckCircle2, Clock3, MapPin, ShieldCheck, ShoppingBag } from "lucide-react";
 import { useCart } from "@/components/cart-provider";
 
-const money=(n:number)=>new Intl.NumberFormat("en-NG",{style:"currency",currency:"NGN",maximumFractionDigits:0}).format(n);
+const money=(n:number)=>new Intl.NumberFormat("en-NG",{style:"currency",currency:"NGN",maximumFractionDigits:0}).format(n/100);
 
 export default function CheckoutPage(){
  const router=useRouter();
