@@ -49,7 +49,7 @@ export default function OrdersPage() {
         </section>
         <p className="mt-4 text-center text-[10px] leading-5 text-[#a19891]">Order history is not connected to Supabase yet. No sample orders are being shown as real purchases.</p>
       </div>
-      <footer className="border-t border-[#eee9e5] py-7 text-center text-[11px] text-[#a19891]">© {new Date().getFullYear()} Cravio · Campus food, without the fuss.</footer>
+      <footer className="border-t border-[#eee9e5] py-7 text-center text-[11px] text-[#a19891]">© {2026} Cravio · Campus food, without the fuss.</footer>
     </main>
   );
 }
