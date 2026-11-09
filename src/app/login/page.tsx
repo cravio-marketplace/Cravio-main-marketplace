@@ -22,7 +22,7 @@ export default function LoginPage() {
       const {error}=await supabase.auth.signInWithPassword({email:email.trim(),password});
       if(error) throw error;
       const redirectTo = new URLSearchParams(window.location.search).get("redirectTo");
-      router.replace(redirectTo?.startsWith("/") ? redirectTo : "/profile"); router.refresh();
+      router.replace(redirectTo?.startsWith("/") && !redirectTo.startsWith("//") ? redirectTo : "/"); router.refresh();
     } catch(err) { setError(err instanceof Error?err.message:"Unable to sign in. Please try again."); }
     finally { setBusy(false); }
   }
