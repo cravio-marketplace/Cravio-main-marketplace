@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowLeft, Minus, Plus, ShoppingBag, Trash2, Utensils } from "lucide-react";
 import { useCart } from "@/components/cart-provider";
 
-const money=(n:number)=>new Intl.NumberFormat("en-NG",{style:"currency",currency:"NGN",maximumFractionDigits:0}).format(n);
+const money=(n:number)=>new Intl.NumberFormat("en-NG",{style:"currency",currency:"NGN",maximumFractionDigits:0}).format(n/100);
 
 export default function CartPage(){
  const {items,vendorName,itemCount,subtotal,setQuantity,removeItem}=useCart();
