@@ -8,7 +8,7 @@ import { FavoriteButton } from "@/components/favorite-button";
 import { useCampusCatalog } from "@/lib/catalog";
 import { ArrowLeft, ArrowRight, Clock3, MapPin, Plus, Search, Star, Store } from "lucide-react";
 
-const money=(n:number)=>new Intl.NumberFormat("en-NG",{style:"currency",currency:"NGN",maximumFractionDigits:0}).format(n);
+const money=(n:number)=>new Intl.NumberFormat("en-NG",{style:"currency",currency:"NGN",maximumFractionDigits:0}).format(n/100);
 
 export default function VendorStorefront(){
  const params=useParams<{slug:string}>(); const {vendors:liveVendors,menu:liveMenu,loading:catalogLoading}=useCampusCatalog(); const liveVendor=liveVendors.find(v=>v.slug===params.slug); const vendor=liveVendor?{slug:liveVendor.slug,name:liveVendor.name,type:liveVendor.description||"Campus vendor",rating:"New",time:"Pickup",cover:liveVendor.cover_url||liveVendor.logo_url||"",description:liveVendor.description||"Campus vendor",menu:liveMenu.filter(m=>m.vendor_id===liveVendor.id).map(m=>({name:m.name,description:m.category||"Freshly prepared",price:m.price,category:m.category||"Meals",image:m.image_url||liveVendor.cover_url||liveVendor.logo_url||"",id:String(m.id),menuItemId:String(m.id),vendorId:liveVendor.id}))}:null;
