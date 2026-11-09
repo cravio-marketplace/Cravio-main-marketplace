@@ -30,10 +30,6 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(destination);
   }
 
-  if (user && ["/login", "/signup"].includes(request.nextUrl.pathname)) {
-    return NextResponse.redirect(new URL("/profile", request.url));
-  }
-
   return response;
 }
 
