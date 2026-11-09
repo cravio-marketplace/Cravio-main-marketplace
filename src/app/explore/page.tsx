@@ -7,20 +7,6 @@ import { FavoriteButton } from "@/components/favorite-button";
 import { useCampusCatalog } from "@/lib/catalog";
 
 const categories=["All","Rice & meals","Fast food","Snacks","Drinks","Breakfast","Desserts"];
-const mockVendors=[
- {slug:"mamas-kitchen",name:"Mama’s Kitchen",type:"Nigerian meals",rating:4.8,time:"15–25 min",status:"Open",category:"Rice & meals",image:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=1000&q=85",featured:true},
- {slug:"the-grill-spot",name:"The Grill Spot",type:"Grills, wraps & sides",rating:4.7,time:"10–20 min",status:"Open",category:"Fast food",image:"https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=1000&q=85",featured:false},
- {slug:"chop-and-sip",name:"Chop & Sip",type:"Meals, snacks & drinks",rating:4.9,time:"20–30 min",status:"Open",category:"Drinks",image:"https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1000&q=85",featured:true},
- {slug:"daily-bites",name:"Daily Bites",type:"Quick meals & snacks",rating:4.6,time:"10–15 min",status:"Closed",category:"Snacks",image:"https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=1000&q=85",featured:false},
-];
-const mockMeals=[
- {name:"Smoky party jollof",vendor:"Mama’s Kitchen",slug:"mamas-kitchen",price:2500,category:"Rice & meals",image:"https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?auto=format&fit=crop&w=800&q=85"},
- {name:"Crispy chicken & chips",vendor:"The Grill Spot",slug:"the-grill-spot",price:3800,category:"Fast food",image:"https://images.unsplash.com/photo-1606755962773-d324e0a13086?auto=format&fit=crop&w=800&q=85"},
- {name:"Creamy chicken pasta",vendor:"Chop & Sip",slug:"chop-and-sip",price:3200,category:"Rice & meals",image:"https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=800&q=85"},
- {name:"Loaded shawarma",vendor:"The Grill Spot",slug:"the-grill-spot",price:3000,category:"Fast food",image:"https://images.unsplash.com/photo-1529006557810-274b9b2fc783?auto=format&fit=crop&w=800&q=85"},
- {name:"Fresh fruit smoothie",vendor:"Chop & Sip",slug:"chop-and-sip",price:1800,category:"Drinks",image:"https://images.unsplash.com/photo-1505252585461-04db1eb84625?auto=format&fit=crop&w=800&q=85"},
- {name:"Loaded cheesy fries",vendor:"Daily Bites",slug:"daily-bites",price:2200,category:"Snacks",image:"https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=800&q=85"},
-];
 const naira=(n:number)=>new Intl.NumberFormat("en-NG",{style:"currency",currency:"NGN",maximumFractionDigits:0}).format(n);
 
 export default function ExplorePage(){
