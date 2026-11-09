@@ -49,7 +49,7 @@ export default function Home() {
   const filteredMeals = useMemo(() => meals.filter((meal) =>
     (activeCategory === "All" || meal.category === activeCategory) &&
     (meal.name.toLowerCase().includes(query.toLowerCase()) || meal.vendor.toLowerCase().includes(query.toLowerCase()))
-  ), [query, activeCategory]);
+  ), [meals, query, activeCategory]);
 
   return (
     <main className="cravio-shell">
