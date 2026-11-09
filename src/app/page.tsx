@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { UserRound } from "lucide-react";
 import { FavoriteButton } from "@/components/favorite-button";
 import { useCampusCatalog } from "@/lib/catalog";
 import {
@@ -25,7 +26,7 @@ export default function Home() {
   const { vendors: liveVendors, menu: liveMenu } = useCampusCatalog();
   const vendors = liveVendors.slice(0,3).map(v=>({slug:v.slug,name:v.name,type:v.description||"Campus vendor",rating:"New",time:"Pickup",image:v.cover_url||v.logo_url||"",tag:"Verified campus vendor"}));
   const meals = liveMenu.filter(m=>liveVendors.some(v=>v.id===m.vendor_id)).slice(0,4).map(m=>{const v=liveVendors.find(v=>v.id===m.vendor_id)!;return {name:m.name,vendor:v.name,price:m.price,category:m.category||"Meals",image:m.image_url||v.cover_url||v.logo_url||"",badge:"Available",vendorSlug:v.slug}});
-  const [currentUser, setCurrentUser] = useState<{ email?: string } | null>(null);
+  const [currentUser, setCurrentUser] = useState<{ email?: string; name: string; avatarUrl?: string } | null>(null);
   const [authReady, setAuthReady] = useState(false);
 
   useEffect(() => {
@@ -33,12 +34,12 @@ export default function Home() {
     let active = true;
     supabase.auth.getSession().then(({ data }) => {
       if (active) {
-        setCurrentUser(data.session?.user ? { email: data.session.user.email ?? undefined } : null);
+        setCurrentUser(data.session?.user ? { email: data.session.user.email ?? undefined, name: String(data.session.user.user_metadata?.full_name || data.session.user.email?.split("@")[0] || "Account"), avatarUrl: typeof data.session.user.user_metadata?.avatar_url === "string" ? data.session.user.user_metadata.avatar_url : undefined } : null);
         setAuthReady(true);
       }
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (active) setCurrentUser(session?.user ? { email: session.user.email ?? undefined } : null);
+      if (active) setCurrentUser(session?.user ? { email: session.user.email ?? undefined, name: String(session.user.user_metadata?.full_name || session.user.email?.split("@")[0] || "Account"), avatarUrl: typeof session.user.user_metadata?.avatar_url === "string" ? session.user.user_metadata.avatar_url : undefined } : null);
     });
     return () => { active = false; subscription.unsubscribe(); };
   }, []);
@@ -62,7 +63,7 @@ export default function Home() {
             {!authReady ? (
               <span className="sign-in" aria-live="polite" />
             ) : currentUser ? (
-              <Link href="/profile" className="sign-in">My account</Link>
+              <Link href="/profile" className="inline-flex items-center gap-2 rounded-full border border-[#eee5df] py-1.5 pl-1.5 pr-3 text-sm font-semibold text-[#1f1f1f] transition hover:border-[#ff6b00]"><span className="grid h-8 w-8 shrink-0 place-items-center overflow-hidden rounded-full bg-[#fff0e5] text-xs font-bold text-[#d95700]">{currentUser.avatarUrl ? <img src={currentUser.avatarUrl} alt="" className="h-full w-full object-cover"/> : currentUser.name.trim().charAt(0).toUpperCase() || <UserRound size={16}/>}</span><span className="max-w-[120px] truncate">{currentUser.name.split(/\s+/)[0]}</span></Link>
             ) : (
               <>
                 <Link href="/login" className="sign-in">Sign in</Link>
