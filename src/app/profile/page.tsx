@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { ArrowRight, Heart, MapPin, Package, Settings, UserRound } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "@/components/auth/logout-button";
@@ -8,6 +9,7 @@ import { LogoutButton } from "@/components/auth/logout-button";
 export const instant = false;
 
 export default async function ProfilePage(){
+ await connection();
  const supabase=await createClient();
  const {data:{user},error}=await supabase.auth.getUser();
  if(error||!user) redirect("/login");
