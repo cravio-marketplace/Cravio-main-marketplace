@@ -44,9 +44,9 @@ export default function Home() {
   useEffect(() => {
     const supabase = createClient();
     let active = true;
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getSession().then(({ data }) => {
       if (active) {
-        setCurrentUser(data.user ? { email: data.user.email ?? undefined } : null);
+        setCurrentUser(data.session?.user ? { email: data.session.user.email ?? undefined } : null);
         setAuthReady(true);
       }
     });
@@ -72,8 +72,10 @@ export default function Home() {
             <Link className="nav-active" href="/">Home</Link><Link href="/explore">Explore</Link><Link href="/favorites">Favorites</Link><Link href="/orders">My orders</Link>
           </nav>
           <div className="header-actions">
-            {authReady && currentUser ? (
-              <Link href="/profile" className="sign-in" aria-label={currentUser.email ? `My account, signed in as ${currentUser.email}` : "My account"}>My account</Link>
+            {!authReady ? (
+              <span className="sign-in" aria-live="polite" />
+            ) : currentUser ? (
+              <Link href="/profile" className="sign-in">My account</Link>
             ) : (
               <>
                 <Link href="/login" className="sign-in">Sign in</Link>
