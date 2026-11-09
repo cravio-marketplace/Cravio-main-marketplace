@@ -18,11 +18,11 @@ export default function OrderDetailsClient() {
  const [error,setError]=useState("");
  useEffect(()=>{
   let active=true;
+  const supabase=createClient();
   async function load(){
    try{
     const api=process.env.NEXT_PUBLIC_CRAVIO_API_URL?.replace(/\/$/,"");
     if(!api)throw new Error("Order tracking is not configured. The customer API URL is missing.");
-    const supabase=createClient();
     const {data:{session}}=await supabase.auth.getSession();
     if(!session){window.location.assign(`/login?redirect=/orders/${id}`);return;}
     const response=await fetch(`${api}/api/customer/orders/${encodeURIComponent(id)}`,{headers:{Authorization:`Bearer ${session.access_token}`}});
