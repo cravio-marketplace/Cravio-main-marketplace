@@ -12,7 +12,7 @@ const money=(n:number)=>new Intl.NumberFormat("en-NG",{style:"currency",currency
 export default function CheckoutPage(){
  const router=useRouter();
  const {items,vendorName,itemCount,subtotal,clearCart}=useCart();
- const [fullName,setFullName]=useState(""); const [phone,setPhone]=useState(""); const [pickupPoint,setPickupPoint]=useState(""); const [extraInfo,setExtraInfo]=useState(""); const [payment,setPayment]=useState("cash"); const [errors,setErrors]=useState<string[]>([]); const [submitting,setSubmitting]=useState(false); const [submitError,setSubmitError]=useState("");
+ const [fullName,setFullName]=useState(""); const [phone,setPhone]=useState(""); const [pickupPoint,setPickupPoint]=useState(""); const [extraInfo,setExtraInfo]=useState(""); const [payment,setPayment]=useState("cash"); const [errors,setErrors]=useState<string[]>([]); const [submitting,setSubmitting]=useState(false); const [submitError,setSubmitError]=useState(""); const [requestId,setRequestId]=useState<string|null>(null);
  const validate=()=>{
   const next:string[]=[];
   if(fullName.trim().length<2)next.push("Enter your full name.");
@@ -32,6 +32,8 @@ export default function CheckoutPage(){
   if(!apiBase){setSubmitError("Order placement is not configured yet. The customer API URL is missing from the app environment.");return;}
   setSubmitting(true);
   try{
+   const orderRequestId=requestId||crypto.randomUUID();
+   if(!requestId)setRequestId(orderRequestId);
    const supabase=createClient();
    const {data:{session},error:sessionError}=await supabase.auth.getSession();
    if(sessionError||!session){router.push("/login?redirect=/checkout");return;}
@@ -46,7 +48,7 @@ export default function CheckoutPage(){
      pickup_point:pickupPoint.trim(),
      pickup_instructions:extraInfo.trim(),
      payment_method:payment,
-     client_order_id:crypto.randomUUID()
+     client_order_id:orderRequestId
     })
    });
    const payload=await response.json().catch(()=>({}));
