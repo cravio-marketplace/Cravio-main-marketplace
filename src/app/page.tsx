@@ -20,7 +20,7 @@ const categories = [
   { name: "Desserts", icon: CakeSlice },
 ];
 
-const money = (amount: number) => new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }).format(amount);
+const money = (amount: number) => new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }).format(amount/100);
 
 export default function Home() {
   const { vendors: liveVendors, menu: liveMenu, loading: catalogLoading, error: catalogError } = useCampusCatalog();
