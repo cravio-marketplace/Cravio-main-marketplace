@@ -32,7 +32,11 @@ export default function OrderDetailsClient() {
    }catch(e){if(active)setError(e instanceof Error?e.message:"Unable to load this order.");}
    finally{if(active)setLoading(false);}
   }
-  void load();return()=>{active=false;};
+  void load();
+  const channel=supabase.channel("customer-order-"+id)
+   .on("postgres_changes",{event:"UPDATE",schema:"public",table:"orders",filter:"id=eq."+id},()=>{void load()})
+   .subscribe();
+  return()=>{active=false;void supabase.removeChannel(channel);};
  },[id]);
  const stageIndex=order?stages.indexOf(order.status):-1;
  return <main className="min-h-screen bg-[#fffdfb] text-[#1f1f1f]">
