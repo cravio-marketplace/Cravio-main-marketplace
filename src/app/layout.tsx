@@ -14,8 +14,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${spaceGrotesk.variable} ${dmSans.variable}`}>
-      <body><CartProvider><FavoritesProvider>{children}</FavoritesProvider></CartProvider></body>
+    <html lang="en" className={`${spaceGrotesk.variable} ${dmSans.variable}`} suppressHydrationWarning>
+      <body suppressHydrationWarning><CartProvider><FavoritesProvider>{children}</FavoritesProvider></CartProvider></body>
     </html>
   );
 }
