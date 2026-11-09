@@ -34,7 +34,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) setItems(parsed);
+        if (Array.isArray(parsed)) setItems((parsed as CartItem[]).filter(item => Boolean(item && item.vendorId && item.menuItemId)));
       }
     } catch { localStorage.removeItem(STORAGE_KEY); }
     setReady(true);
