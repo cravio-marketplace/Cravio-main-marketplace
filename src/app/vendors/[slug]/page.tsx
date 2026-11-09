@@ -1,51 +1,10 @@
-"use client";
+import { Suspense } from "react";
+import VendorStorefrontClient from "./vendor-storefront-client";
 
-import Link from "next/link";
-import { useMemo, useState } from "react";
-import { useParams } from "next/navigation";
-import { useCart } from "@/components/cart-provider";
-import { FavoriteButton } from "@/components/favorite-button";
-import { useCampusCatalog } from "@/lib/catalog";
-import { ArrowLeft, ArrowRight, Clock3, MapPin, Plus, Search, Star, Store } from "lucide-react";
-
-const catalog=[
- {slug:"mamas-kitchen",name:"Mama’s Kitchen",type:"Authentic Nigerian meals",rating:"4.8",time:"15–25 min",cover:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=1500&q=90",description:"Comforting campus meals, freshly prepared and full of flavour.",menu:[
-  {name:"Smoky party jollof",description:"Party-style jollof rice served with tender chicken.",price:2500,category:"Rice & meals",image:"https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?auto=format&fit=crop&w=800&q=85"},
-  {name:"Fried rice & chicken",description:"Colourful vegetable fried rice with seasoned chicken.",price:3000,category:"Rice & meals",image:"https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=800&q=85"},
-  {name:"Spaghetti stir-fry",description:"A savoury stir-fry with vegetables and a rich sauce.",price:2200,category:"Rice & meals",image:"https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=800&q=85"},
-  {name:"Chilled zobo",description:"Refreshing house-made hibiscus drink.",price:700,category:"Drinks",image:"https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=800&q=85"}
- ]},
- {slug:"the-grill-spot",name:"The Grill Spot",type:"Grills, wraps & sides",rating:"4.7",time:"10–20 min",cover:"https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=1500&q=90",description:"Grilled favourites and quick bites made fresh for your break.",menu:[
-  {name:"Loaded shawarma",description:"Warm flatbread packed with chicken, vegetables and sauce.",price:3000,category:"Fast food",image:"https://images.unsplash.com/photo-1529006557810-274b9b2fc783?auto=format&fit=crop&w=800&q=85"},
-  {name:"Crispy chicken & chips",description:"Golden fries with crunchy, seasoned chicken.",price:3800,category:"Fast food",image:"https://images.unsplash.com/photo-1606755962773-d324e0a13086?auto=format&fit=crop&w=800&q=85"}
- ]},
- {slug:"chop-and-sip",name:"Chop & Sip",type:"Meals, snacks & drinks",rating:"4.9",time:"20–30 min",cover:"https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1500&q=90",description:"A little something for every craving, from lunch to late afternoon.",menu:[
-  {name:"Creamy chicken pasta",description:"Creamy pasta tossed with chicken and herbs.",price:3200,category:"Meals",image:"https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=800&q=85"},
-  {name:"Fresh fruit smoothie",description:"A cool blend of seasonal fruits.",price:1800,category:"Drinks",image:"https://images.unsplash.com/photo-1505252585461-04db1eb84625?auto=format&fit=crop&w=800&q=85"}
- ]},
- {slug:"daily-bites",name:"Daily Bites",type:"Quick meals & snacks",rating:"4.6",time:"10–15 min",cover:"https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=1500&q=90",description:"Quick, satisfying bites for the in-between moments.",menu:[
-  {name:"Loaded cheesy fries",description:"Crispy fries topped with cheese and house sauce.",price:2200,category:"Snacks",image:"https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=800&q=85"}
- ]}
-];
-const money=(n:number)=>new Intl.NumberFormat("en-NG",{style:"currency",currency:"NGN",maximumFractionDigits:0}).format(n);
-
-export default function VendorStorefront(){
- const params=useParams<{slug:string}>(); const {vendors:liveVendors,menu:liveMenu,loading:catalogLoading}=useCampusCatalog(); const mockVendor=catalog.find(v=>v.slug===params.slug); const liveVendor=liveVendors.find(v=>v.slug===params.slug); const vendor=liveVendor?{slug:liveVendor.slug,name:liveVendor.name,type:liveVendor.description||"Campus vendor",rating:"New",time:"Pickup",cover:liveVendor.cover_url||liveVendor.logo_url||"",description:liveVendor.description||"Campus vendor",menu:liveMenu.filter(m=>m.vendor_id===liveVendor.id).map(m=>({name:m.name,description:m.category||"Freshly prepared",price:m.price,category:m.category||"Meals",image:m.image_url||liveVendor.cover_url||liveVendor.logo_url||"",id:m.id}))}:mockVendor;
- const [term,setTerm]=useState(""); const [category,setCategory]=useState("All"); const {addItem,itemCount}=useCart(); const [notice,setNotice]=useState("");
- const categories=useMemo(()=>["All",...Array.from(new Set(vendor?.menu.map(m=>m.category)??[]))],[vendor]);
- const items=useMemo(()=>vendor?.menu.filter(m=>(category==="All"||m.category===category)&&m.name.toLowerCase().includes(term.toLowerCase()))??[],[vendor,category,term]);
- if(!vendor&&catalogLoading)return <main className="min-h-screen grid place-items-center text-sm text-[#8b8179]">Loading vendor storefront…</main>; if(!vendor)return <main className="min-h-screen bg-[#fffdfb] px-6 py-24 text-center"><Store className="mx-auto text-[#ff6b00]" size={30}/><h1 className="mt-4 text-2xl font-bold">Vendor not found</h1><p className="mt-2 text-sm text-[#8b8179]">This storefront may have moved or is not available.</p><Link href="/explore" className="mt-5 inline-block font-bold text-[#ff6b00]">Back to Explore</Link></main>;
- return <main className="min-h-screen bg-[#fffdfb] text-[#1f1f1f]">
-  <header className="sticky top-0 z-20 border-b border-[#eee9e5] bg-white/95 backdrop-blur"><div className="mx-auto flex h-[66px] max-w-[1180px] items-center justify-between px-5 md:px-8"><Link href="/" className="font-[family-name:var(--font-space-grotesk)] text-[27px] font-bold tracking-[-1.7px]">cravio<span className="text-[#ff6b00]">.</span></Link><Link href="/cart" className="rounded-xl border border-[#eee7e1] px-4 py-2 text-sm font-bold">Cart ({itemCount})</Link></div></header>
-  <div className="mx-auto max-w-[1080px] px-5 pb-20 pt-7 md:px-8"><Link href="/explore" className="inline-flex items-center gap-2 text-xs font-bold text-[#8b8179]"><ArrowLeft size={14}/> Explore vendors</Link>
-   <div className="relative mt-5 h-52 overflow-hidden rounded-[22px] bg-cover bg-center md:h-72" style={{backgroundImage:`url("${vendor.cover}")`}}><div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/5 to-transparent"/><span className="absolute bottom-5 left-5 rounded-lg bg-white/95 px-3 py-2 text-[10px] font-extrabold text-[#3f3934]">MIU CAMPUS VENDOR</span></div>
-   <div className="flex flex-col justify-between gap-4 border-b border-[#eee9e5] py-6 sm:flex-row sm:items-center"><div><p className="text-[10px] font-extrabold tracking-[1.6px] text-[#b27a53]">WELCOME TO</p><h1 className="mt-1 font-[family-name:var(--font-space-grotesk)] text-3xl font-bold tracking-[-1.4px] md:text-4xl">{vendor.name}</h1><p className="mt-2 text-sm text-[#827970]">{vendor.description}</p><div className="mt-3 flex flex-wrap gap-4 text-xs text-[#746c65]"><span className="flex items-center gap-1"><Star size={14} fill="#e5a000" className="text-[#e5a000]"/><b>{vendor.rating}</b> rating</span><span className="flex items-center gap-1"><Clock3 size={14}/>{vendor.time}</span><span className="flex items-center gap-1"><MapPin size={14}/>MIU Campus · Pickup</span></div></div><span className="w-fit rounded-full bg-[#e9f7e7] px-3 py-2 text-[10px] font-extrabold text-[#397b40]">● Accepting orders</span></div>
-   <section className="pt-8"><div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-[10px] font-extrabold tracking-[1.7px] text-[#b27a53]">MADE FRESH FOR YOU</p><h2 className="mt-1 font-[family-name:var(--font-space-grotesk)] text-2xl font-bold tracking-[-.8px]">The menu</h2></div><label className="flex h-11 items-center gap-2 rounded-xl border border-[#eae4de] bg-white px-3 sm:w-64"><Search size={16} className="text-[#a49a91]"/><input value={term} onChange={e=>setTerm(e.target.value)} placeholder="Search this menu..." className="w-full bg-transparent text-xs outline-none"/></label></div>
-    {notice&&<p role="status" className="mb-3 rounded-xl bg-[#fff2e8] px-4 py-3 text-xs font-semibold text-[#9a531e]">{notice}</p>}<div className="mt-5 flex gap-2 overflow-x-auto pb-2">{categories.map(c=><button key={c} onClick={()=>setCategory(c)} className={`shrink-0 rounded-full border px-4 py-2 text-xs font-bold ${category===c?"border-[#ff6b00] bg-[#ff6b00] text-white":"border-[#eee7e1] bg-white text-[#766e67]"}`}>{c}</button>)}</div>
-    <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">{items.map(item=><article key={item.name} className="flex min-h-[142px] gap-3 overflow-hidden rounded-2xl border border-[#eee9e5] bg-white p-3"><div className="relative h-28 w-28 shrink-0 rounded-xl bg-cover bg-center sm:h-32 sm:w-32" style={{backgroundImage:`url("${item.image}")`}}><FavoriteButton itemKey={`meal:${item.name.toLowerCase().replace(/[^a-z0-9]+/g,"-")}`} itemType="meal" name={item.name} vendorName={vendor.name} vendorSlug={vendor.slug} price={item.price} imageUrl={item.image} className="absolute right-2 top-2 z-[3] grid h-8 w-8 place-items-center rounded-full bg-white/95 text-[#6d625a] shadow-sm transition hover:text-[#e94e48]" /></div><div className="flex min-w-0 flex-1 flex-col"><p className="text-[9px] font-bold uppercase tracking-wider text-[#a58b78]">{item.category}</p><h3 className="mt-1 font-[family-name:var(--font-space-grotesk)] text-sm font-bold">{item.name}</h3><p className="mt-1 line-clamp-2 text-[10px] leading-4 text-[#8d837b]">{item.description}</p><div className="mt-auto flex items-center justify-between pt-2"><strong className="text-sm">{money(item.price)}</strong><button onClick={()=>{const added=addItem({id:`${vendor.slug}-${item.name.toLowerCase().replace(/[^a-z0-9]+/g,"-")}`,name:item.name,vendorSlug:vendor.slug,vendorName:vendor.name,price:item.price,image:item.image});setNotice(added?`${item.name} added to cart`:"Your cart already contains items from another vendor. Complete that order first.");}} aria-label={`Add ${item.name} to cart`} className="grid h-8 w-8 place-items-center rounded-lg bg-[#ff6b00] text-white transition hover:bg-[#e85f00]"><Plus size={17}/></button></div></div></article>)}</div>
-    {items.length===0&&<p className="rounded-xl border border-dashed border-[#e5dcd4] py-12 text-center text-sm text-[#928982]">No menu items match that search.</p>}
-   </section>
-   <div className="mt-12 rounded-2xl bg-[#fff2e8] p-5 text-center"><p className="text-sm font-bold">Ordering from {vendor.name}?</p><p className="mt-1 text-xs text-[#88766a]">Pickup is available on campus. Add your favourites to your cart.</p><Link href="/cart" className="mt-3 inline-flex items-center gap-2 rounded-xl bg-[#ff6b00] px-4 py-2.5 text-xs font-bold text-white">View cart <ArrowRight size={14}/></Link></div>
-  </div><footer className="border-t border-[#eee9e5] py-7 text-center text-[11px] text-[#a19891]">© {new Date().getFullYear()} Cravio · Campus food, without the fuss.</footer>
- </main>;
+export default function VendorStorefrontPage() {
+  return (
+    <Suspense fallback={<main className="grid min-h-screen place-items-center text-sm text-[#8b8179]">Loading vendor storefront…</main>}>
+      <VendorStorefrontClient />
+    </Suspense>
+  );
 }
