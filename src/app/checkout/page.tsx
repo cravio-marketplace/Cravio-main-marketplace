@@ -28,7 +28,7 @@ export default function CheckoutPage(){
    setSubmitError("This menu item is not connected to the live vendor catalogue yet. Please return to Explore and choose an available menu item.");
    return;
   }
-  const apiBase=process.env.NEXT_PUBLIC_CRAVIO_API_URL?.replace(/\\/$/,"");
+  const apiBase=process.env.NEXT_PUBLIC_CRAVIO_API_URL?.replace(/\/$/,"");
   if(!apiBase){setSubmitError("Order placement is not configured yet. The customer API URL is missing from the app environment.");return;}
   setSubmitting(true);
   try{
