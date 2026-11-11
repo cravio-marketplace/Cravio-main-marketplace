@@ -60,7 +60,7 @@ export default function FavoritesPage() {
                     <p className="text-[10px] font-semibold text-[#a18a79]">{item.item_type === "vendor" ? "Campus vendor" : item.vendor_name}</p>
                     <h2 className="mt-1 min-h-10 text-sm font-bold leading-5">{item.name}</h2>
                     <div className="mt-2 flex items-center justify-between gap-2">
-                      {item.price !== null ? <strong className="text-xs">{money(item.price}</strong> : <span className="text-[10px] text-[#9a918a]">View storefront</span>}
+                      {item.price !== null ? <strong className="text-xs">{money(item.price)}</strong> : <span className="text-[10px] text-[#9a918a]">View storefront</span>}
                       <button onClick={() => void removeFavorite(item.item_key)} aria-label={`Remove ${item.name} from favourites`} className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[#fff1e7] text-[#e45b42] transition hover:bg-[#ffe4d7]"><Trash2 size={15}/></button>
                     </div>
                   </div>
