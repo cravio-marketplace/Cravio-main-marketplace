@@ -29,13 +29,13 @@ export default function LoginPage() {
   return <main className="min-h-screen bg-[#fff8f3] px-5 py-10 text-[#1f1f1f]">
     <div className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-5xl overflow-hidden rounded-[28px] bg-white shadow-[0_24px_80px_#572b1110] md:grid-cols-2">
       <section className="hidden flex-col justify-between bg-[#ff6b00] p-10 text-white md:flex">
-        <Link href="/" className="font-[family-name:var(--font-space-grotesk)] text-3xl font-bold tracking-[-2px]">cravio.</Link>
+        <Link href="/" className="inline-flex"><img src="/brand/logo-primary.png" alt="Cravio" className="h-10 w-auto brightness-0 invert" /></Link>
         <div><Utensils size={30}/><h1 className="mt-6 font-[family-name:var(--font-space-grotesk)] text-5xl font-bold leading-[1.05] tracking-[-2px]">Your campus cravings, sorted.</h1><p className="mt-4 max-w-xs text-sm leading-6 text-white/80">Sign in and get back to the good stuff. Great food is closer than you think.</p></div>
         <p className="text-xs text-white/70">Campus food, without the fuss.</p>
       </section>
       <section className="flex items-center px-6 py-12 sm:px-12">
         <div className="mx-auto w-full max-w-sm">
-          <Link href="/" className="font-[family-name:var(--font-space-grotesk)] text-3xl font-bold tracking-[-2px] md:hidden">cravio<span className="text-[#ff6b00]">.</span></Link>
+          <Link href="/" className="md:hidden"><img src="/brand/logo-primary.png" alt="Cravio" className="h-9 w-auto" /></Link>
           <p className="mt-8 text-[10px] font-extrabold tracking-[1.8px] text-[#b27a53]">WELCOME BACK</p>
           <h2 className="mt-2 font-[family-name:var(--font-space-grotesk)] text-3xl font-bold tracking-[-1.5px]">Sign in to Cravio</h2>
           <p className="mt-2 text-sm text-[#8d837b]">Your next great meal is just around the corner.</p>
