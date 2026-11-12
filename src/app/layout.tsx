@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, DM_Sans } from "next/font/google";
 import "./globals.css";
+import "./cravio-loader.css";
 import { CartProvider } from "@/components/cart-provider";
 import { FavoritesProvider } from "@/components/favorites-provider";
 
@@ -10,6 +11,7 @@ const dmSans = DM_Sans({ variable: "--font-dm-sans", subsets: ["latin"] });
 export const metadata: Metadata = {
   title: { default: "Cravio | Campus food, sorted.", template: "%s | Cravio" },
   description: "Discover campus meals, order ahead, and spend less time in queues with Cravio.",
+  icons: { icon: "/brand/favicon.ico", apple: "/brand/favicon-256.png" },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
