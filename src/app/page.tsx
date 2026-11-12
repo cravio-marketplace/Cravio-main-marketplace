@@ -55,7 +55,7 @@ export default function Home() {
     <main className="cravio-shell">
       <header className="site-header">
         <div className="header-inner">
-          <Link href="/" className="brand" aria-label="Cravio home">cravio<span>.</span></Link>
+          <Link href="/" className="brand-logo-link" aria-label="Cravio home"><img src="/brand/logo-primary.png" alt="Cravio" className="brand-logo" /></Link>
           <nav className="desktop-nav" aria-label="Main navigation">
             <Link className="nav-active" href="/">Home</Link><Link href="/explore">Explore</Link><Link href="/favorites">Favorites</Link><Link href="/orders">My orders</Link>
           </nav>
