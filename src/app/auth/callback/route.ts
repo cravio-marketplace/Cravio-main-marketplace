@@ -9,8 +9,10 @@ export async function GET(request: NextRequest) {
   if (code) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) return NextResponse.redirect(new URL(next.startsWith("/") && !next.startsWith("//") ? next : "/", origin));
+    if (!error) {
+      return NextResponse.redirect(new URL("/email-confirmed", origin));
+    }
   }
 
-  return NextResponse.redirect(new URL("/login?error=auth_callback", origin));
+  return NextResponse.redirect(new URL("/email-confirmed?status=error", origin));
 }
