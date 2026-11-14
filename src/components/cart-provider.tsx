@@ -19,7 +19,7 @@ type CartContextValue = {
   itemCount: number;
   subtotal: number;
   addItem: (item: Omit<CartItem,"quantity">) => boolean;
-  setQuantity: (id: string, quantity: number) => void;
+  setQuantity: (id: string, quantity: number) => void;\n  setSpecialInstructions: (id: string, instructions: string) => void;
   removeItem: (id: string) => void;
   clearCart: () => void;
 };
@@ -51,9 +51,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return true;
   },[items]);
   const setQuantity = useCallback((id:string,quantity:number) => setItems(current=>quantity<=0?current.filter(x=>x.id!==id):current.map(x=>x.id===id?{...x,quantity}:x)),[]);
-  const removeItem = useCallback((id:string)=>setItems(current=>current.filter(x=>x.id!==id)),[]);
+  const setSpecialInstructions = useCallback((id:string,instructions:string)=>setItems(current=>current.map(item=>item.id===id?{...item,specialInstructions:instructions.slice(0,300)}:item)),[]);\n  const removeItem = useCallback((id:string)=>setItems(current=>current.filter(x=>x.id!==id)),[]);
   const clearCart = useCallback(()=>setItems([]),[]);
-  const value = useMemo(()=>({items,vendorName:items[0]?.vendorName??null,itemCount:items.reduce((n,x)=>n+x.quantity,0),subtotal:items.reduce((n,x)=>n+x.price*x.quantity,0),addItem,setQuantity,removeItem,clearCart}),[items,addItem,setQuantity,removeItem,clearCart]);
+  const value = useMemo(()=>({items,vendorName:items[0]?.vendorName??null,itemCount:items.reduce((n,x)=>n+x.quantity,0),subtotal:items.reduce((n,x)=>n+x.price*x.quantity,0),addItem,setQuantity,setSpecialInstructions,removeItem,clearCart}),[items,addItem,setQuantity,setSpecialInstructions,removeItem,clearCart]);
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
 export function useCart() {
