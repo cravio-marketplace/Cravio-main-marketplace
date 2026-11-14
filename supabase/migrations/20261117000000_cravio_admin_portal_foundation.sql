@@ -57,3 +57,24 @@ DROP POLICY IF EXISTS customer_controls_admin_access ON public.customer_account_
 CREATE POLICY customer_controls_admin_access ON public.customer_account_controls FOR ALL TO authenticated USING(public.cravio_is_admin()) WITH CHECK(public.cravio_is_admin());
 GRANT SELECT ON public.admin_profiles,public.admin_audit_logs,public.admin_disputes,public.platform_settings,public.customer_account_controls TO authenticated;
 GRANT ALL ON public.admin_profiles,public.admin_audit_logs,public.admin_disputes,public.platform_settings,public.customer_account_controls TO service_role;
+
+-- Admin vendor suspension remembers vendor-selected state for safe reactivation.
+ALTER TABLE public.vendors ADD COLUMN IF NOT EXISTS admin_previous_status text;
+ALTER TABLE public.vendors ADD COLUMN IF NOT EXISTS admin_previous_accepting_orders boolean;
+-- Settlement receipt/payment reference metadata; no payment is initiated by this schema.
+ALTER TABLE public.vendor_settlements ADD COLUMN IF NOT EXISTS reference text;
+ALTER TABLE public.vendor_settlements ADD COLUMN IF NOT EXISTS reference_date timestamptz;
+ALTER TABLE public.vendor_settlements ADD COLUMN IF NOT EXISTS recorded_by uuid REFERENCES auth.users(id) ON DELETE SET NULL;
+ALTER TABLE public.vendor_settlements ADD COLUMN IF NOT EXISTS recorded_at timestamptz;
+-- Enforce admin suspension at the database boundary, including checkout RPC calls.
+CREATE OR REPLACE FUNCTION public.reject_admin_suspended_vendor_orders()
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$
+BEGIN
+ IF EXISTS(SELECT 1 FROM public.vendors v WHERE v.id=NEW.vendor_id AND v.admin_suspended=true) THEN
+  RAISE EXCEPTION 'This vendor is temporarily unavailable.' USING ERRCODE='P0001';
+ END IF;
+ RETURN NEW;
+END;$$;
+DROP TRIGGER IF EXISTS orders_reject_admin_suspended_vendor ON public.orders;
+CREATE TRIGGER orders_reject_admin_suspended_vendor BEFORE INSERT ON public.orders
+FOR EACH ROW EXECUTE FUNCTION public.reject_admin_suspended_vendor_orders();
