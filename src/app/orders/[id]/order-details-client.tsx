@@ -7,7 +7,7 @@ import { ArrowLeft, CheckCircle2, Clock3, MapPin, PackageCheck, ShieldCheck } fr
 import { createClient } from "@/lib/supabase/client";
 
 type Order={id:number;items:Array<{name:string;quantity:number;price:number}>;total_price:number;subtotal_price?:number;service_fee?:number;payment_method:string;payment_status:string;status:string;pickup_code:string|null;pickup_point:string;pickup_instructions:string|null;created_at:string};
-const money=(n:number)=>new Intl.NumberFormat("en-NG",{style:"currency",currency:"NGN",maximumFractionDigits:0}).format(n/100);
+const money=(n:number)=>new Intl.NumberFormat("en-NG",{style:"currency",currency:"NGN",minimumFractionDigits:0,maximumFractionDigits:2}).format(n/100);
 const label=(s:string)=>s.replace(/_/g," ").replace(/\b\w/g,m=>m.toUpperCase());
 const stages=["pending","accepted","ready","completed"];
 
