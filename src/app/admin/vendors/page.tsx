@@ -1,0 +1,1 @@
+import AdminResource from "../admin-resource";import {requireAdmin} from "@/lib/admin-auth";export default async function Page(){await requireAdmin();return <AdminResource kind="vendors"/>}

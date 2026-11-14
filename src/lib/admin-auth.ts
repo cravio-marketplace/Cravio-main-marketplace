@@ -1,0 +1,2 @@
+import {redirect} from "next/navigation";import {createClient} from "@/lib/supabase/server";
+export async function requireAdmin(){const s=await createClient();const {data:{user}}=await s.auth.getUser();if(!user)redirect("/admin/login");const {data:p}=await s.from("admin_profiles").select("role,status").eq("user_id",user.id).maybeSingle();if(!p||p.status!=="active")redirect("/admin/login");return p;}
