@@ -85,3 +85,11 @@ INSERT INTO public.platform_settings(key,value) VALUES
  ('first_order_fee_waived','true'::jsonb),('commission_rate_bps','500'::jsonb),('commission_free_days','60'::jsonb),
  ('cash_owed_cap_kobo','500000'::jsonb),('settlement_due_days','7'::jsonb)
 ON CONFLICT(key) DO NOTHING;
+
+-- Audit events are append-only, including for service-role callers.
+CREATE OR REPLACE FUNCTION public.prevent_admin_audit_mutation()
+RETURNS trigger LANGUAGE plpgsql SET search_path=public AS $$
+BEGIN RAISE EXCEPTION 'Admin audit logs are immutable.' USING ERRCODE='55000'; END;$$;
+DROP TRIGGER IF EXISTS admin_audit_logs_immutable ON public.admin_audit_logs;
+CREATE TRIGGER admin_audit_logs_immutable BEFORE UPDATE OR DELETE ON public.admin_audit_logs
+FOR EACH ROW EXECUTE FUNCTION public.prevent_admin_audit_mutation();
