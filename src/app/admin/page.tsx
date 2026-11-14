@@ -2,7 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { Activity, ArrowUpRight, BadgeCheck, Banknote, ClipboardList, Store, Users, Wallet } from "lucide-react";\nimport {AdminLogout} from "./admin-logout";
+import { Activity, ArrowUpRight, BadgeCheck, Banknote, ClipboardList, Store, Users, Wallet } from "lucide-react";
+import {AdminLogout} from "./admin-logout";
 
 const apiBase=(process.env.CRAVIO_API_URL||process.env.NEXT_PUBLIC_CRAVIO_API_URL||"https://cravio-marketplace-jwlq.onrender.com").replace(/\/$/,"");
 const fmt=(k:number)=>new Intl.NumberFormat("en-NG",{style:"currency",currency:"NGN",maximumFractionDigits:0}).format(k/100);
