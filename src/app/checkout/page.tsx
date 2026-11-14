@@ -21,7 +21,7 @@ export default function CheckoutPage(){
     const supabase=createClient();
     const {data:{session}}=await supabase.auth.getSession();
     if(!session){if(active){setServiceFee(null);setFirstOrder(false);}return;}
-    const apiBase=(process.env.NEXT_PUBLIC_CRAVIO_API_URL || "https://cravio-marketplace-jwlq.onrender.com").replace(/\\/$/,"");
+    const apiBase=(process.env.NEXT_PUBLIC_CRAVIO_API_URL || "https://cravio-marketplace-jwlq.onrender.com").replace(/\/$/,"");
     const response=await fetch(`${apiBase}/api/customer/orders/fee-preview?subtotal_kobo=${encodeURIComponent(String(subtotal))}`,{headers:{Authorization:`Bearer ${session.access_token}`}});
     const payload=await response.json().catch(()=>({}));
     if(!response.ok)throw new Error(payload.error||"Unable to calculate the service fee.");
