@@ -114,6 +114,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     };
 
     void syncCart();
+    const refreshTimer = window.setInterval(() => { void syncCart(); }, 30000);
+    window.addEventListener("focus", syncCart);
     const channel = supabase
       .channel(`cart-menu-sync-${cartVendorId}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "menu_items" }, () => {
@@ -123,6 +125,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     return () => {
       active = false;
+      window.clearInterval(refreshTimer);
+      window.removeEventListener("focus", syncCart);
       void supabase.removeChannel(channel);
     };
   }, [ready, menuItemKey, cartVendorId]);
