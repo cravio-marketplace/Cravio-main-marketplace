@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 export type CartItem = {
   id: string;
@@ -79,6 +80,52 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const clearCart = useCallback(() => setItems([]), []);
+
+  const menuItemKey = items.map(item => item.menuItemId).filter(Boolean).sort().join(",");
+  const cartVendorId = items[0]?.vendorId;
+
+  // Keep persisted cart prices aligned with the live vendor catalogue.
+  // Items that are deleted, hidden or sold out are removed from the cart.
+  useEffect(() => {
+    if (!ready || !menuItemKey || !cartVendorId) return;
+    let active = true;
+    const supabase = createClient();
+    const itemIds = menuItemKey.split(",").filter(Boolean);
+
+    const syncCart = async () => {
+      const { data, error } = await supabase
+        .from("menu_items")
+        .select("id,vendor_id,name,price,image_url,available,quantity")
+        .in("id", itemIds);
+      if (error || !active) return;
+
+      const liveItems = new Map((data || []).map(item => [String(item.id), item]));
+      setItems(current => current.flatMap(item => {
+        if (item.vendorId !== cartVendorId) return [item];
+        const live = liveItems.get(String(item.menuItemId));
+        if (!live || live.available !== true || (live.quantity !== null && live.quantity <= 0)) return [];
+        return [{
+          ...item,
+          name: live.name || item.name,
+          price: live.price,
+          image: live.image_url || item.image,
+        }];
+      }));
+    };
+
+    void syncCart();
+    const channel = supabase
+      .channel(`cart-menu-sync-${cartVendorId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "menu_items" }, () => {
+        void syncCart();
+      })
+      .subscribe();
+
+    return () => {
+      active = false;
+      void supabase.removeChannel(channel);
+    };
+  }, [ready, menuItemKey, cartVendorId]);
 
   const value = useMemo(() => ({
     items,
