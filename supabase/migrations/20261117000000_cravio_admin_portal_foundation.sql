@@ -110,3 +110,14 @@ CREATE OR REPLACE FUNCTION public.capture_order_status_event() RETURNS trigger L
 BEGIN IF NEW.status IS DISTINCT FROM OLD.status THEN INSERT INTO public.order_status_events(order_id,old_status,new_status,changed_by,source) VALUES(NEW.id,OLD.status,NEW.status,auth.uid(),'database');END IF;RETURN NEW;END;$$;
 DROP TRIGGER IF EXISTS orders_capture_status_event ON public.orders;
 CREATE TRIGGER orders_capture_status_event AFTER UPDATE OF status ON public.orders FOR EACH ROW EXECUTE FUNCTION public.capture_order_status_event();
+
+ALTER TABLE public.vendors ADD COLUMN IF NOT EXISTS cash_orders_paused_by_admin boolean NOT NULL DEFAULT false;
+CREATE OR REPLACE FUNCTION public.reject_admin_suspended_vendor_orders()
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$
+DECLARE v_blocked boolean;
+BEGIN
+ SELECT admin_suspended OR (NEW.payment_method='cash' AND cash_orders_paused_by_admin)
+ INTO v_blocked FROM public.vendors WHERE id=NEW.vendor_id;
+ IF COALESCE(v_blocked,false) THEN RAISE EXCEPTION 'Cash orders are blocked for this vendor.' USING ERRCODE='P0001'; END IF;
+ RETURN NEW;
+END;$$;
