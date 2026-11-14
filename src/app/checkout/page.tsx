@@ -28,8 +28,7 @@ export default function CheckoutPage(){
    setSubmitError("This menu item is not connected to the live vendor catalogue yet. Please return to Explore and choose an available menu item.");
    return;
   }
-  const apiBase=process.env.NEXT_PUBLIC_CRAVIO_API_URL?.replace(/\/$/,"");
-  if(!apiBase){setSubmitError("Order placement is not configured yet. The customer API URL is missing from the app environment.");return;}
+  const apiBase=(process.env.NEXT_PUBLIC_CRAVIO_API_URL || "https://cravio-marketplace-jwlq.onrender.com").replace(/\/$/,"");
   setSubmitting(true);
   try{
    const orderRequestId=requestId||crypto.randomUUID();
@@ -42,7 +41,7 @@ export default function CheckoutPage(){
     headers:{"Content-Type":"application/json",Authorization:`Bearer ${session.access_token}`},
     body:JSON.stringify({
      vendor_id:vendorId,
-     items:items.map(item=>({menu_item_id:item.menuItemId,quantity:item.quantity})),
+     items:items.map(item=>({menu_item_id:item.menuItemId,quantity:item.quantity,special_instructions:(item.specialInstructions||"").trim()})),
      student_name:fullName.trim(),
      student_phone:phone.trim(),
      pickup_point:pickupPoint.trim(),
@@ -81,7 +80,7 @@ export default function CheckoutPage(){
     {submitError&&<div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-xs leading-5 text-red-700">{submitError}</div>}
     <button onClick={placeOrder} disabled={submitting} className="w-full rounded-xl bg-[#ff6b00] px-5 py-4 text-sm font-extrabold text-white shadow-[0_8px_18px_#ff6b0030] transition hover:bg-[#e85f00] disabled:cursor-wait disabled:opacity-60">{submitting?"Placing your order…":"Place order"}</button>
    </section>
-   <aside className="h-fit rounded-2xl border border-[#eee9e5] bg-white p-5 lg:sticky lg:top-6"><h2 className="font-[family-name:var(--font-space-grotesk)] text-lg font-bold">Order summary</h2><p className="mt-1 text-xs text-[#92877e]">{vendorName} · Pickup</p><div className="mt-5 space-y-3">{items.map(item=><div key={item.id} className="flex justify-between gap-3 text-xs"><span className="min-w-0 text-[#726960]">{item.quantity} × {item.name}</span><strong className="shrink-0">{money(item.price*item.quantity)}</strong></div>)}</div><div className="my-5 border-t border-dashed border-[#e8e0d9]"/><div className="flex justify-between text-xs text-[#817971]"><span>Items ({itemCount})</span><strong className="text-[#1f1f1f]">{money(subtotal)}</strong></div><div className="mt-3 flex justify-between text-xs text-[#817971]"><span>Pickup fee</span><strong className="text-[#397b40]">Free</strong></div><div className="my-5 border-t border-[#eee9e5]"/><div className="flex justify-between"><strong className="text-sm">Total</strong><strong className="text-xl">{money(subtotal)}</strong></div><div className="mt-5 flex items-start gap-2 rounded-xl bg-[#f7f5f2] p-3 text-[10px] leading-5 text-[#837970]"><Clock3 size={14} className="mt-0.5 shrink-0"/> The vendor’s preparation time will be confirmed after order placement is enabled.</div></aside>
+   <aside className="h-fit rounded-2xl border border-[#eee9e5] bg-white p-5 lg:sticky lg:top-6"><h2 className="font-[family-name:var(--font-space-grotesk)] text-lg font-bold">Order summary</h2><p className="mt-1 text-xs text-[#92877e]">{vendorName} · Pickup</p><div className="mt-5 space-y-3">{items.map(item=><div key={item.id} className="flex justify-between gap-3 text-xs"><span className="min-w-0 text-[#726960]">{item.quantity} × {item.name}</span><strong className="shrink-0">{money(item.price*item.quantity)}</strong>{item.specialInstructions?.trim()&&<p className="mt-1 w-full text-[10px] leading-4 text-[#8d837b]">Prep: {item.specialInstructions}</p>}</div>)}</div><div className="my-5 border-t border-dashed border-[#e8e0d9]"/><div className="flex justify-between text-xs text-[#817971]"><span>Items ({itemCount})</span><strong className="text-[#1f1f1f]">{money(subtotal)}</strong></div><div className="mt-3 flex justify-between text-xs text-[#817971]"><span>Pickup fee</span><strong className="text-[#397b40]">Free</strong></div><div className="my-5 border-t border-[#eee9e5]"/><div className="flex justify-between"><strong className="text-sm">Total</strong><strong className="text-xl">{money(subtotal)}</strong></div><div className="mt-5 flex items-start gap-2 rounded-xl bg-[#f7f5f2] p-3 text-[10px] leading-5 text-[#837970]"><Clock3 size={14} className="mt-0.5 shrink-0"/> Your preparation notes will be sent to the vendor with each food item.</div></aside>
    </div>
   </div><footer className="border-t border-[#eee9e5] py-7 text-center text-[11px] text-[#a19891]">© 2026 Cravio · Campus food, without the fuss.</footer>
  </main>;
