@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 import { ArrowLeft, CheckCircle2, Clock3, MapPin, PackageCheck, ShieldCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
-type Order={id:number;items:Array<{name:string;quantity:number;price:number}>;total_price:number;payment_method:string;payment_status:string;status:string;pickup_code:string|null;pickup_point:string;pickup_instructions:string|null;created_at:string};
+type Order={id:number;items:Array<{name:string;quantity:number;price:number}>;total_price:number;subtotal_price?:number;service_fee?:number;payment_method:string;payment_status:string;status:string;pickup_code:string|null;pickup_point:string;pickup_instructions:string|null;created_at:string};
 const money=(n:number)=>new Intl.NumberFormat("en-NG",{style:"currency",currency:"NGN",maximumFractionDigits:0}).format(n/100);
 const label=(s:string)=>s.replace(/_/g," ").replace(/\b\w/g,m=>m.toUpperCase());
 const stages=["pending","accepted","ready","completed"];
@@ -33,10 +33,11 @@ export default function OrderDetailsClient() {
    finally{if(active)setLoading(false);}
   }
   void load();
+  const pollTimer=window.setInterval(()=>{void load();},15000);
   const channel=supabase.channel("customer-order-"+id)
    .on("postgres_changes",{event:"UPDATE",schema:"public",table:"orders",filter:"id=eq."+id},()=>{void load()})
    .subscribe();
-  return()=>{active=false;void supabase.removeChannel(channel);};
+  return()=>{active=false;window.clearInterval(pollTimer);void supabase.removeChannel(channel);};
  },[id]);
  const stageIndex=order?stages.indexOf(order.status):-1;
  return <main className="min-h-screen bg-[#fffdfb] text-[#1f1f1f]">
@@ -46,10 +47,10 @@ export default function OrderDetailsClient() {
    {order.status==="rejected"?<div className="mt-6 rounded-xl bg-red-50 p-4 text-sm text-red-700">The vendor could not accept this order. Please contact the vendor for assistance.</div>:<div className="mt-7 grid grid-cols-4 gap-2">{stages.map((stage,index)=><div key={stage}><div className={`h-1.5 rounded-full transition-all duration-700 ease-out ${stageIndex>=index?"bg-[#ff6b00]":"bg-[#eee9e5]"}`}/><p className={`mt-2 text-[9px] font-bold transition-colors duration-500 sm:text-[10px] ${stageIndex>=index?"text-[#a45117]":"text-[#a49a91]"}`}>{label(stage)}</p></div>)}</div>}
    {order.status==="ready"&&order.pickup_code&&<div className="mt-6 rounded-2xl border border-[#bfe1bd] bg-[#f0faef] p-5 text-center"><p className="text-[10px] font-extrabold tracking-wider text-[#397b40]">YOUR PICKUP CODE</p><p className="mt-2 font-[family-name:var(--font-space-grotesk)] text-4xl font-bold tracking-[8px] text-[#245e2b]">{order.pickup_code}</p><p className="mt-2 text-xs text-[#547b57]">Show this code to the vendor when collecting your order.</p></div>}
   </section>
-  <section className="mt-4 rounded-2xl border border-[#eee9e5] bg-white p-5"><h2 className="font-[family-name:var(--font-space-grotesk)] text-lg font-bold">Items ordered</h2><div className="mt-4 space-y-3">{order.items?.map((item,index)=><div key={index} className="flex justify-between gap-3 text-sm"><span className="text-[#726960]">{item.quantity} × {item.name}</span><strong>{money(item.price*item.quantity)}</strong></div>)}</div><div className="my-4 border-t border-[#eee9e5]"/><div className="flex justify-between text-sm"><span className="text-[#817971]">Total</span><strong className="text-lg">{money(order.total_price)}</strong></div></section>
+  <section className="mt-4 rounded-2xl border border-[#eee9e5] bg-white p-5"><h2 className="font-[family-name:var(--font-space-grotesk)] text-lg font-bold">Items ordered</h2><div className="mt-4 space-y-3">{order.items?.map((item,index)=><div key={index} className="flex justify-between gap-3 text-sm"><span className="text-[#726960]">{item.quantity} × {item.name}</span><strong>{money(item.price*item.quantity)}</strong></div>)}</div><div className="my-4 border-t border-[#eee9e5]"/><div className="flex justify-between text-sm"><span className="text-[#817971]">Food subtotal</span><strong>{money(order.subtotal_price??(order.total_price-(order.service_fee||0)))}</strong></div><div className="mt-2 flex justify-between text-sm"><span className="text-[#817971]">Service fee</span><strong>{(order.service_fee||0)===0?"Free":money(order.service_fee||0)}</strong></div><div className="my-3 border-t border-[#eee9e5]"/><div className="flex justify-between text-sm"><span className="text-[#817971]">Total</span><strong className="text-lg">{money(order.total_price)}</strong></div></section>
   <section className="mt-4 rounded-2xl border border-[#eee9e5] bg-white p-5"><h2 className="font-[family-name:var(--font-space-grotesk)] text-lg font-bold">Pickup & payment</h2><div className="mt-4 flex gap-3"><MapPin size={17} className="mt-0.5 text-[#ff6b00]"/><div><p className="text-xs font-bold">Pickup point</p><p className="mt-1 text-sm text-[#756b63]">{order.pickup_point}</p>{order.pickup_instructions&&<p className="mt-1 text-xs text-[#8d837b]">{order.pickup_instructions}</p>}</div></div><div className="mt-4 flex gap-3"><ShieldCheck size={17} className="mt-0.5 text-[#ff6b00]"/><div><p className="text-xs font-bold">{label(order.payment_method)} · {label(order.payment_status)}</p><p className="mt-1 text-xs text-[#8d837b]">Pay the vendor when you collect your order.</p></div></div></section>
   </>}
-   <div className="mt-5 flex items-center justify-center gap-2 text-[11px] text-[#9a9189]"><Clock3 size={14}/> Vendor status updates appear when you refresh this page.</div>
+   <div className="mt-5 flex items-center justify-center gap-2 text-[11px] text-[#9a9189]"><Clock3 size={14}/> Order status updates automatically while this page is open.</div>
   </div><footer className="border-t border-[#eee9e5] py-7 text-center text-[11px] text-[#a19891]">© 2026 Cravio · Campus food, without the fuss.</footer>
  </main>;
 }
