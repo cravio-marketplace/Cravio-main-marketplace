@@ -78,3 +78,10 @@ END;$$;
 DROP TRIGGER IF EXISTS orders_reject_admin_suspended_vendor ON public.orders;
 CREATE TRIGGER orders_reject_admin_suspended_vendor BEFORE INSERT ON public.orders
 FOR EACH ROW EXECUTE FUNCTION public.reject_admin_suspended_vendor_orders();
+
+-- Defaults mirror the current backend fee policy (amounts in kobo, rates in basis points).
+INSERT INTO public.platform_settings(key,value) VALUES
+ ('service_fee_rate_bps','500'::jsonb),('service_fee_min_kobo','5000'::jsonb),('service_fee_max_kobo','20000'::jsonb),
+ ('first_order_fee_waived','true'::jsonb),('commission_rate_bps','500'::jsonb),('commission_free_days','60'::jsonb),
+ ('cash_owed_cap_kobo','500000'::jsonb),('settlement_due_days','7'::jsonb)
+ON CONFLICT(key) DO NOTHING;
