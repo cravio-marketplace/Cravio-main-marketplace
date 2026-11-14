@@ -12,7 +12,7 @@ export default function LoginPage() {
   const [password,setPassword]=useState("");
   const [show,setShow]=useState(false);
   const [busy,setBusy]=useState(false);
-  const [error,setError]=useState("");
+  const [error,setError]=useState(""); const [resending,setResending]=useState(false); const [resendMessage,setResendMessage]=useState(""); const [needsVerification,setNeedsVerification]=useState(false);
   useEffect(() => { if (new URLSearchParams(window.location.search).get("error") === "auth_callback") setError("Your sign-in link could not be verified. Please try again."); }, []);
 
   async function submit(e:React.FormEvent<HTMLFormElement>) {
@@ -21,8 +21,8 @@ export default function LoginPage() {
       const supabase=createClient();
       const {error}=await supabase.auth.signInWithPassword({email:email.trim(),password});
       if(error) throw error;
-      router.replace("/"); router.refresh();
-    } catch(err) { setError(err instanceof Error?err.message:"Unable to sign in. Please try again."); }
+      const next=new URLSearchParams(window.location.search).get("redirectTo")||new URLSearchParams(window.location.search).get("redirect")||"/"; router.replace(next.startsWith("/")?next:"/"); router.refresh();
+    } catch(err) { const message=err instanceof Error?err.message:"Unable to sign in. Please try again."; setError(/email not confirmed/i.test(message)?"Your email is not verified yet. Resend the confirmation link below.":/invalid login credentials/i.test(message)?"Email or password is incorrect. If you just created your account, verify your email first or reset your password.":message); setNeedsVerification(/email not confirmed|invalid login credentials/i.test(message)); }
     finally { setBusy(false); }
   }
 
@@ -43,7 +43,7 @@ export default function LoginPage() {
             <label className="block text-xs font-bold">Email address<input required type="email" autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com" className="mt-2 h-12 w-full rounded-xl border border-[#eae4de] px-4 text-sm font-normal outline-none focus:border-[#ff6b00]"/></label>
             <label className="block text-xs font-bold">Password<span className="relative mt-2 block"><input required type={show?"text":"password"} autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Enter your password" className="h-12 w-full rounded-xl border border-[#eae4de] px-4 pr-12 text-sm font-normal outline-none focus:border-[#ff6b00]"/><button type="button" onClick={()=>setShow(!show)} aria-label={show?"Hide password":"Show password"} className="absolute right-3 top-3.5 text-[#8d837b]">{show?<EyeOff size={18}/>:<Eye size={18}/>}</button></span></label>
             <div className="text-right"><Link href="/forgot-password" className="text-xs font-bold text-[#ff6b00] hover:underline">Forgot password?</Link></div>
-            {error&&<p role="alert" className="rounded-lg bg-red-50 p-3 text-xs text-red-700">{error}</p>}
+            {error&&<p role="alert" className="rounded-lg bg-red-50 p-3 text-xs text-red-700">{error}</p>}{needsVerification&&<button type="button" disabled={resending} onClick={async()=>{setResending(true);setResendMessage("");try{const {error}=await createClient().auth.resend({type:"signup",email:email.trim(),options:{emailRedirectTo:`${window.location.origin}/auth/callback?next=/`}});if(error)throw error;setResendMessage("If this email has an unverified Cravio account, a fresh confirmation link has been sent. Check spam too.");}catch(e){setResendMessage(e instanceof Error?e.message:"Could not resend confirmation.");}finally{setResending(false);}}} className="w-full rounded-lg border border-[#ffd2b4] p-3 text-xs font-bold text-[#c45b12]">{resending?"Sending confirmation…":"Resend email confirmation"}</button>}{resendMessage&&<p role="status" className="text-xs text-[#6e7669]">{resendMessage}</p>}
             <button disabled={busy} className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#ff6b00] text-sm font-bold text-white transition hover:bg-[#e85f00] disabled:opacity-60">{busy?"Signing in...":"Sign in"} <ArrowRight size={16}/></button>
           </form>
           <p className="mt-7 text-center text-sm text-[#817971]">New to Cravio? <Link href="/signup" className="font-bold text-[#ff6b00]">Create an account</Link></p>
