@@ -103,14 +103,25 @@ export function useCampusCatalog(){
   }
 
   void load();
+  const refreshCatalog=()=>{void load();};
+  const handleVisibility=()=>{
+   if(document.visibilityState==="visible")refreshCatalog();
+  };
+  const refreshInterval=window.setInterval(refreshCatalog,30000);
+  window.addEventListener("focus",refreshCatalog);
+  document.addEventListener("visibilitychange",handleVisibility);
+
   const channel=supabase.channel("customer-live-catalog")
-   .on("postgres_changes",{event:"*",schema:"public",table:"menu_items"},()=>{void load()})
-   .on("postgres_changes",{event:"*",schema:"public",table:"item_variants"},()=>{void load()})
-   .on("postgres_changes",{event:"*",schema:"public",table:"vendors"},()=>{void load()})
+   .on("postgres_changes",{event:"*",schema:"public",table:"menu_items"},refreshCatalog)
+   .on("postgres_changes",{event:"*",schema:"public",table:"item_variants"},refreshCatalog)
+   .on("postgres_changes",{event:"*",schema:"public",table:"vendors"},refreshCatalog)
    .subscribe();
 
   return()=>{
    active=false;
+   window.clearInterval(refreshInterval);
+   window.removeEventListener("focus",refreshCatalog);
+   document.removeEventListener("visibilitychange",handleVisibility);
    void supabase.removeChannel(channel);
   };
  },[]);
