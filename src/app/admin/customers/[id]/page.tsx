@@ -1,1 +1,1 @@
-import CustomerDetail from "../../customer-detail";import {requireAdmin} from "@/lib/admin-auth";export default async function Page({params}:{params:Promise<{id:string}>}){await requireAdmin();const {id}=await params;return <CustomerDetail id={id}/ >}
+import CustomerDetail from "../../customer-detail";import {requireAdmin} from "@/lib/admin-auth";export default async function Page({params}:{params:Promise<{id:string}>}){await requireAdmin();const {id}=await params;return <CustomerDetail id={id}/>}
