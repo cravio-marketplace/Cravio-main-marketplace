@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { ArrowLeft, CheckCircle2, Clock3, MapPin, ShieldCheck, ShoppingBag } from "lucide-react";
 import { useCart } from "@/components/cart-provider";
@@ -12,7 +12,27 @@ const money=(n:number)=>new Intl.NumberFormat("en-NG",{style:"currency",currency
 export default function CheckoutPage(){
  const router=useRouter();
  const {items,vendorName,itemCount,subtotal,clearCart}=useCart();
- const [fullName,setFullName]=useState(""); const [phone,setPhone]=useState(""); const [pickupPoint,setPickupPoint]=useState(""); const [extraInfo,setExtraInfo]=useState(""); const [payment,setPayment]=useState("cash"); const [errors,setErrors]=useState<string[]>([]); const [submitting,setSubmitting]=useState(false); const [submitError,setSubmitError]=useState(""); const [requestId,setRequestId]=useState<string|null>(null);
+ const [fullName,setFullName]=useState(""); const [phone,setPhone]=useState(""); const [pickupPoint,setPickupPoint]=useState(""); const [extraInfo,setExtraInfo]=useState(""); const [payment,setPayment]=useState("cash"); const [errors,setErrors]=useState<string[]>([]); const [submitting,setSubmitting]=useState(false); const [submitError,setSubmitError]=useState(""); const [requestId,setRequestId]=useState<string|null>(null); const [serviceFee,setServiceFee]=useState<number|null>(null); const [firstOrder,setFirstOrder]=useState(false); const [feeLoading,setFeeLoading]=useState(true);
+ useEffect(()=>{
+  let active=true;
+  async function loadFeePreview(){
+   setFeeLoading(true);
+   try{
+    const supabase=createClient();
+    const {data:{session}}=await supabase.auth.getSession();
+    if(!session){if(active){setServiceFee(null);setFirstOrder(false);}return;}
+    const apiBase=(process.env.NEXT_PUBLIC_CRAVIO_API_URL || "https://cravio-marketplace-jwlq.onrender.com").replace(/\\/$/,"");
+    const response=await fetch(`${apiBase}/api/customer/orders/fee-preview?subtotal_kobo=${encodeURIComponent(String(subtotal))}`,{headers:{Authorization:`Bearer ${session.access_token}`}});
+    const payload=await response.json().catch(()=>({}));
+    if(!response.ok)throw new Error(payload.error||"Unable to calculate the service fee.");
+    if(active){setServiceFee(Number(payload.service_fee)||0);setFirstOrder(Boolean(payload.is_first_order));}
+   }catch{
+    if(active)setServiceFee(null);
+   }finally{if(active)setFeeLoading(false);}
+  }
+  void loadFeePreview();
+  return()=>{active=false;};
+ },[subtotal]);
  const validate=()=>{
   const next:string[]=[];
   if(fullName.trim().length<2)next.push("Enter your full name.");
@@ -80,7 +100,7 @@ export default function CheckoutPage(){
     {submitError&&<div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-xs leading-5 text-red-700">{submitError}</div>}
     <button onClick={placeOrder} disabled={submitting} className="w-full rounded-xl bg-[#ff6b00] px-5 py-4 text-sm font-extrabold text-white shadow-[0_8px_18px_#ff6b0030] transition hover:bg-[#e85f00] disabled:cursor-wait disabled:opacity-60">{submitting?"Placing your order…":"Place order"}</button>
    </section>
-   <aside className="h-fit rounded-2xl border border-[#eee9e5] bg-white p-5 lg:sticky lg:top-6"><h2 className="font-[family-name:var(--font-space-grotesk)] text-lg font-bold">Order summary</h2><p className="mt-1 text-xs text-[#92877e]">{vendorName} · Pickup</p><div className="mt-5 space-y-3">{items.map(item=><div key={item.id} className="flex justify-between gap-3 text-xs"><span className="min-w-0 text-[#726960]">{item.quantity} × {item.name}</span><strong className="shrink-0">{money(item.price*item.quantity)}</strong>{item.specialInstructions?.trim()&&<p className="mt-1 w-full text-[10px] leading-4 text-[#8d837b]">Prep: {item.specialInstructions}</p>}</div>)}</div><div className="my-5 border-t border-dashed border-[#e8e0d9]"/><div className="flex justify-between text-xs text-[#817971]"><span>Items ({itemCount})</span><strong className="text-[#1f1f1f]">{money(subtotal)}</strong></div><div className="mt-3 flex justify-between text-xs text-[#817971]"><span>Pickup fee</span><strong className="text-[#397b40]">Free</strong></div><div className="my-5 border-t border-[#eee9e5]"/><div className="flex justify-between"><strong className="text-sm">Total</strong><strong className="text-xl">{money(subtotal)}</strong></div><div className="mt-5 flex items-start gap-2 rounded-xl bg-[#f7f5f2] p-3 text-[10px] leading-5 text-[#837970]"><Clock3 size={14} className="mt-0.5 shrink-0"/> Your preparation notes will be sent to the vendor with each food item.</div></aside>
+   <aside className="h-fit rounded-2xl border border-[#eee9e5] bg-white p-5 lg:sticky lg:top-6"><h2 className="font-[family-name:var(--font-space-grotesk)] text-lg font-bold">Order summary</h2><p className="mt-1 text-xs text-[#92877e]">{vendorName} · Pickup</p><div className="mt-5 space-y-3">{items.map(item=><div key={item.id} className="flex justify-between gap-3 text-xs"><span className="min-w-0 text-[#726960]">{item.quantity} × {item.name}</span><strong className="shrink-0">{money(item.price*item.quantity)}</strong>{item.specialInstructions?.trim()&&<p className="mt-1 w-full text-[10px] leading-4 text-[#8d837b]">Prep: {item.specialInstructions}</p>}</div>)}</div><div className="my-5 border-t border-dashed border-[#e8e0d9]"/><div className="flex justify-between text-xs text-[#817971]"><span>Items ({itemCount})</span><strong className="text-[#1f1f1f]">{money(subtotal)}</strong></div><div className="mt-3 flex justify-between text-xs text-[#817971]"><span>Service fee{firstOrder&&serviceFee===0?" · first order waived":""}</span><strong className={serviceFee===0?"text-[#397b40]":"text-[#1f1f1f]"}>{feeLoading?"Calculating…":serviceFee===null?"Sign in to calculate":serviceFee===0?"Free":money(serviceFee)}</strong></div><div className="my-5 border-t border-[#eee9e5]"/><div className="flex justify-between"><strong className="text-sm">Total</strong><strong className="text-xl">{serviceFee===null?money(subtotal):money(subtotal+serviceFee)}</strong></div><div className="mt-5 flex items-start gap-2 rounded-xl bg-[#f7f5f2] p-3 text-[10px] leading-5 text-[#837970]"><Clock3 size={14} className="mt-0.5 shrink-0"/> Your preparation notes will be sent to the vendor with each food item.</div></aside>
    </div>
   </div><footer className="border-t border-[#eee9e5] py-7 text-center text-[11px] text-[#a19891]">© 2026 Cravio · Campus food, without the fuss.</footer>
  </main>;
