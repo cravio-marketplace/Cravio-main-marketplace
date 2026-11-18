@@ -1,0 +1,1 @@
+import AdminsPanel from "./admins-panel";import {requireAdmin} from "@/lib/admin-auth";import {redirect} from "next/navigation";export default async function Page(){const p=await requireAdmin();if(p.role!=="super_admin")redirect("/admin");return <AdminsPanel/>}
