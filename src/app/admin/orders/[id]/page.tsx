@@ -1,1 +1,8 @@
-import AdminDetail from "../../admin-detail";import {requireAdmin} from "@/lib/admin-auth";export default async function Page({params}:{params:Promise<{id:string}>}){await requireAdmin();const {id}=await params;return <AdminDetail kind="orders" id={id}/>
+import AdminDetail from "../../admin-detail";
+import { requireAdmin } from "@/lib/admin-auth";
+
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+  await requireAdmin();
+  const { id } = await params;
+  return <AdminDetail kind="orders" id={id} />;
+}
