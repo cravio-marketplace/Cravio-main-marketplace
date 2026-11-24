@@ -33,12 +33,12 @@ export default function AdminNavigationShell({ children }: { children: React.Rea
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
-  // The dashboard already has its own desktop navigation.
-  if (pathname === "/admin" || pathname === "/admin/login") return <>{children}</>;
+  if (pathname === "/admin/login") return <>{children}</>;
+  const isDashboard = pathname === "/admin";
 
   const nav = (
     <nav className="space-y-1">
-      {links.filter((item) => item.href !== "/admin").map(({ label, href, Icon }) => {
+      {links.map(({ label, href, Icon }) => {
         const active = pathname === href || (href !== "/admin" && pathname.startsWith(href + "/"));
         return (
           <Link key={href} href={href} onClick={() => setOpen(false)}
@@ -52,20 +52,20 @@ export default function AdminNavigationShell({ children }: { children: React.Rea
 
   return (
     <div className="min-h-screen bg-[#faf8f6]">
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[245px] border-r border-[#eee7e1] bg-white p-5 lg:block">
+      {!isDashboard && <aside className="fixed inset-y-0 left-0 z-40 hidden w-[245px] border-r border-[#eee7e1] bg-white p-5 lg:block">
         <Link href="/admin" className="font-[family-name:var(--font-space-grotesk)] text-3xl font-bold tracking-[-2px]">cravio<span className="text-[#ff6b00]">.</span></Link>
         <p className="mb-8 mt-1 text-[10px] font-bold tracking-[2px] text-[#a19a93]">ADMIN CONSOLE</p>
         {nav}
         <div className="absolute bottom-5 left-5 right-5 rounded-xl bg-[#fff8f2] p-3 text-xs text-[#8a7665]">Campus operations<br/><strong className="text-[#1f1f1f]">MIU · Pickup only</strong></div>
-      </aside>
+      </aside>}
 
-      <div className="lg:pl-[245px]">
+      <div className={isDashboard ? "" : "lg:pl-[245px]"}>
         <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-[#eee7e1] bg-white/95 px-4 backdrop-blur lg:hidden">
           <button type="button" onClick={() => setOpen((value) => !value)} aria-label={open ? "Close navigation" : "Open navigation"} className="grid size-10 place-items-center rounded-lg border border-[#eee7e1]">
             {open ? <X size={19}/> : <Menu size={19}/>}
           </button>
           <Link href="/admin" className="font-bold tracking-tight">cravio<span className="text-[#ff6b00]">.</span> <span className="ml-1 text-xs font-medium text-[#8a837c]">Admin</span></Link>
-          <Link href={backHref(pathname)} className="flex items-center gap-1 text-sm font-medium text-[#e96000]"><ArrowLeft size={16}/>Back</Link>
+          {isDashboard ? <span className="w-10"/> : <Link href={backHref(pathname)} className="flex items-center gap-1 text-sm font-medium text-[#e96000]"><ArrowLeft size={16}/>Back</Link>}
         </header>
 
         {open && <button aria-label="Close navigation overlay" onClick={() => setOpen(false)} className="fixed inset-0 z-30 bg-black/30 lg:hidden"/>}
@@ -74,10 +74,10 @@ export default function AdminNavigationShell({ children }: { children: React.Rea
           {nav}
         </div>
 
-        <div className="hidden h-12 items-center border-b border-[#eee7e1] bg-white px-8 lg:flex">
+        {!isDashboard && <div className="hidden h-12 items-center border-b border-[#eee7e1] bg-white px-8 lg:flex">
           <Link href={backHref(pathname)} className="flex items-center gap-2 text-sm font-medium text-[#e96000] hover:underline"><ArrowLeft size={16}/>Back</Link>
           <span className="ml-4 text-xs text-[#a19a93]">Cravio Admin Console</span>
-        </div>
+        </div>}
         {children}
       </div>
     </div>
