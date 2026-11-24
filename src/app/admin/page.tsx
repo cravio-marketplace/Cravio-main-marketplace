@@ -8,8 +8,9 @@ import {AdminLogout} from "./admin-logout";
 const apiBase=(process.env.CRAVIO_API_URL||process.env.NEXT_PUBLIC_CRAVIO_API_URL||"https://cravio-marketplace-jwlq.onrender.com").replace(/\/$/,"");
 const fmt=(k:number)=>new Intl.NumberFormat("en-NG",{style:"currency",currency:"NGN",maximumFractionDigits:0}).format(k/100);
 const cards=[["Orders today","orders_today",ClipboardList],["Orders this week","orders_week",Activity],["Orders this month","orders_month",ClipboardList],["GMV","gmv_kobo",Banknote],["Service fees","service_fees_kobo",Wallet],["Commission","commission_kobo",Banknote],["Platform earnings","platform_profit_kobo",Wallet],["Cash owed","cash_owed_kobo",Banknote],["Active vendors","active_vendors",Store],["New customers","new_customers",Users],["Pending applications","pending_vendor_applications",BadgeCheck]] as const;
-export default async function AdminDashboard({searchParams}:{searchParams:Promise<{range?:string}>}){const query=await searchParams;const range=query.range||'30d';
- await connection();const supabase=await createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/admin/login");
+export default async function AdminDashboard({searchParams}:{searchParams:Promise<{range?:string}>}){
+ await connection();
+ const query=await searchParams;const range=query.range||'30d';const supabase=await createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/admin/login");
  const {data:profile}=await supabase.from("admin_profiles").select("full_name,role,status").eq("user_id",user.id).maybeSingle();if(!profile||profile.status!=="active")redirect("/admin/login");
  const {data:{session}}=await supabase.auth.getSession();let payload:any=null;
  try{const res=await fetch(apiBase+"/api/admin/dashboard?range="+range,{headers:{Authorization:"Bearer "+session?.access_token},cache:"no-store"});if(res.ok)payload=await res.json();}catch{}
